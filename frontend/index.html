@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vantage of AI — Which AI Works For Your Job?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090B;
+  --s1:#111113;
+  --s2:#18181B;
+  --s3:#27272A;
+  --border:#3F3F46;
+  --border2:#52525B;
+  --text:#FAFAFA;
+  --muted:#A1A1AA;
+  --dim:#71717A;
+  --gemini:#4285F4;
+  --openai:#10A37F;
+  --anthropic:#D97757;
+  --verified:#22C55E;
+  --review:#F59E0B;
+  --flagged:#EF4444;
+  --display:'Playfair Display',serif;
+  --body:'DM Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(66,133,244,.08),transparent)}
+
+/* ── NAV ── */
+nav{
+  position:fixed;inset:0 0 auto;z-index:300;height:52px;
+  display:flex;align-items:center;padding:0 28px;gap:20px;
+  background:rgba(9,9,11,.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.n-logo{
+  font-family:var(--display);font-size:17px;font-weight:900;
+  letter-spacing:-.01em;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+}
+.n-logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gemini);box-shadow:0 0 8px var(--gemini)}
+.n-steps{display:flex;margin:0 auto}
+.n-step{
+  padding:0 16px;height:52px;display:flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.03em;
+  border-right:1px solid var(--border);cursor:default;transition:color .2s;
+}
+.n-step:first-child{border-left:1px solid var(--border)}
+.n-step .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0}
+.n-step.active{color:var(--gemini)}.n-step.active .dot{opacity:1}
+.n-step.done{color:var(--verified)}.n-step.done .dot{opacity:1}
+.n-right{display:flex;align-items:center;gap:8px}
+.n-pill{
+  font-size:11px;font-weight:700;font-family:var(--mono);letter-spacing:.05em;
+  padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);
+  color:var(--dim);background:transparent;transition:all .2s;
+}
+.n-pill.live{border-color:var(--verified);color:var(--verified)}
+.n-pill.lb{border-color:var(--border2);color:var(--muted)}
+.n-pill.lb:hover{border-color:var(--gemini);color:var(--gemini)}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;min-height:100vh;padding-top:52px;opacity:0;transform:translateY(14px);transition:opacity .4s ease,transform .4s ease}
+.screen.active{display:block}
+.screen.in{opacity:1;transform:none}
+
+/* ── HOME ── */
+#s-home{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:52px 24px 80px;text-align:center;
+  background:radial-gradient(ellipse 70% 60% at 50% 10%,rgba(66,133,244,.1) 0%,transparent 70%);
+}
+.h-eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gemini);margin-bottom:32px;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border:1px solid rgba(66,133,244,.3);border-radius:100px;
+  background:rgba(66,133,244,.06);
+}
+.h-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gemini);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.h-title{
+  font-family:var(--display);font-size:clamp(52px,8vw,110px);font-weight:900;
+  line-height:.92;letter-spacing:-.02em;margin-bottom:28px;
+}
+.h-title .line2{font-style:italic;color:transparent;
+  background:linear-gradient(135deg,var(--gemini) 0%,#818CF8 50%,var(--anthropic) 100%);
+  -webkit-background-clip:text;background-clip:text;}
+.h-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.7;margin-bottom:48px;font-weight:400}
+.h-models{display:flex;gap:12px;margin-bottom:48px;flex-wrap:wrap;justify-content:center}
+.h-model-tag{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 16px;border-radius:8px;border:1px solid var(--border);
+  font-size:13px;font-weight:600;color:var(--muted);background:var(--s1);
+}
+.h-model-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.h-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--text);color:var(--bg);font-family:var(--body);
+  font-size:15px;font-weight:700;padding:16px 40px;border-radius:10px;
+  border:none;cursor:pointer;letter-spacing:-.01em;
+  transition:transform .15s,opacity .15s;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 32px rgba(0,0,0,.4);
+}
+.h-cta:hover{opacity:.88;transform:translateY(-2px)}
+.h-cta .arr{transition:transform .2s}
+.h-cta:hover .arr{transform:translateX(4px)}
+.h-note{margin-top:14px;font-size:12px;color:var(--dim)}
+.h-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:64px;max-width:700px;text-align:left}
+.feat{padding:20px;background:var(--s1);border:1px solid var(--border);border-radius:12px;transition:border-color .2s}
+.feat:hover{border-color:var(--border2)}
+.feat-n{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--gemini);letter-spacing:.1em;margin-bottom:10px}
+.feat-t{font-size:14px;font-weight:700;margin-bottom:6px}
+.feat-d{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── WRAP ── */
+.wrap{max-width:680px;margin:0 auto;padding:48px 24px 80px}
+.pg-h{font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:900;letter-spacing:-.02em;margin-bottom:8px;line-height:1.05}
+.pg-s{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:36px;max-width:500px}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:32px}
+.prog-bar{height:2px;background:var(--s3);border-radius:2px;overflow:hidden;position:relative}
+.prog-fill{height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gemini),#818CF8);transition:width .6s cubic-bezier(.4,0,.2,1)}
+.prog-labels{display:flex;justify-content:space-between;margin-top:10px}
+.prog-lbl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);transition:color .3s}
+.prog-lbl.a{color:var(--gemini)}.prog-lbl.d{color:var(--verified)}
+
+/* ── FORM ── */
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.lbl-n{text-transform:none;letter-spacing:.03em;color:var(--dim)}
+input,select,textarea{
+  width:100%;padding:13px 16px;font-family:var(--body);font-size:14px;font-weight:500;
+  background:var(--s1);color:var(--text);border:1px solid var(--border);border-radius:10px;
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gemini);box-shadow:0 0 0 3px rgba(66,133,244,.12)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select option{background:var(--s2)}
+textarea{resize:vertical;min-height:120px;line-height:1.7}
+.hint{font-size:11px;color:var(--dim);line-height:1.5}
+.cc{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;transition:color .2s}
+.cc.ok{color:var(--verified)}
+
+/* ── PROF GRID ── */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pc{
+  padding:10px 12px;background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;font-size:12px;font-weight:600;color:var(--dim);text-align:center;
+  transition:all .15s;
+}
+.pc:hover{border-color:var(--border2);color:var(--muted)}
+.pc.s{border-color:var(--gemini);background:rgba(66,133,244,.1);color:var(--gemini)}
+
+/* ── TOGGLE ── */
+.tog{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;margin-bottom:18px;transition:border-color .2s;
+}
+.tog:hover{border-color:var(--border2)}
+.t-tr{width:36px;height:20px;background:var(--s3);border-radius:10px;position:relative;flex-shrink:0;transition:background .2s}
+.t-tr.on{background:var(--gemini)}
+.t-th{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.t-tr.on .t-th{left:19px}
+.t-lb{font-size:13px;font-weight:600}
+.t-nt{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--body);font-size:13px;font-weight:700;padding:12px 26px;border-radius:10px;border:none;cursor:pointer;transition:transform .12s,opacity .15s;letter-spacing:-.01em}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--text);color:var(--bg);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.btn-p:hover{opacity:.88}
+.btn-p:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;font-size:12px;border-radius:10px}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-v{background:var(--verified);color:#000}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ── ERROR ── */
+.err{padding:12px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;font-size:13px;color:var(--flagged);margin-bottom:16px;font-weight:500}
+
+/* ── LOADING ── */
+.load{padding:28px;background:var(--s1);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:18px}
+.ls{display:flex;align-items:center;gap:14px}
+.li{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .3s}
+.li.p{background:var(--s2);color:var(--dim);border:1px solid var(--border)}
+.li.r{background:rgba(66,133,244,.15);color:var(--gemini);border:1px solid var(--gemini);animation:glow 1.4s ease infinite}
+.li.d{background:rgba(34,197,94,.1);color:var(--verified);border:1px solid var(--verified)}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(66,133,244,.4)}60%{box-shadow:0 0 0 8px transparent}}
+.ll{font-size:14px;font-weight:600}
+.ls-{font-size:11px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+
+/* ── VERDICT ── */
+.vcard{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.vh{padding:22px 24px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--border)}
+.vh.verified{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)}
+.vh.review{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2)}
+.vh.flagged{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}
+.vbadge{padding:4px 12px;border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;flex-shrink:0;margin-top:2px}
+.vbadge.verified{background:var(--verified);color:#000}
+.vbadge.review{background:var(--review);color:#000}
+.vbadge.flagged{background:var(--flagged);color:#fff}
+.vt{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
+.vr{font-size:13px;color:var(--muted);line-height:1.6}
+.vb{padding:22px 24px;display:flex;flex-direction:column;gap:18px}
+.sc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sc{padding:14px;background:var(--s2);border-radius:10px;border:1px solid var(--border)}
+.sc-k{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.sc-tr{height:2px;background:var(--s3);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.sc-fi{height:2px;border-radius:2px;transition:width 1s ease}
+.sc-vl{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.01em}
+.fl-list{display:flex;flex-direction:column;gap:6px}
+.fl{padding:9px 13px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:12px;color:var(--flagged);font-weight:500}
+
+/* ── LINKEDIN PROFILE CARD ── */
+.prof-card{
+  padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  display:flex;align-items:center;gap:14px;
+}
+.prof-avatar{
+  width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gemini),#818CF8);
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;
+  color:#fff;flex-shrink:0;font-family:var(--display);
+}
+.prof-name{font-size:14px;font-weight:700}
+.prof-headline{font-size:12px;color:var(--muted);margin-top:2px}
+.prof-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:5px;background:rgba(66,133,244,.15);color:var(--gemini);font-weight:600}
+
+/* ── RESPONSE CARDS ── */
+.rgrid{display:flex;flex-direction:column;gap:12px}
+.rc{
+  background:var(--s1);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;
+  cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;
+}
+.rc:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.rc.sel{border-color:var(--gemini);box-shadow:0 0 0 3px rgba(66,133,244,.15)}
+.rc.won{border-color:var(--verified);box-shadow:0 0 0 3px rgba(34,197,94,.12);cursor:default}
+.rc.lost{opacity:.4;cursor:default}
+.rh{
+  padding:12px 18px;background:var(--s2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.rl{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.02em}
+.rtype{font-family:var(--mono);font-size:10px;color:var(--dim);background:var(--s3);border:1px solid var(--border);padding:2px 8px;border-radius:5px}
+.rsel{margin-left:auto;font-size:11px;font-weight:700;color:var(--dim);padding:4px 12px;border:1px solid var(--border2);border-radius:6px;background:transparent;transition:all .15s}
+.rc:hover .rsel,.rc.sel .rsel{background:var(--gemini);color:#fff;border-color:var(--gemini)}
+.rbody{padding:18px;font-size:13px;line-height:1.8;color:rgba(250,250,250,.75);white-space:pre-wrap;font-weight:400}
+.wtag{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 10px;border-radius:5px}
+.wtag.y{background:var(--verified);color:#000}
+.wtag.n{background:var(--s3);color:var(--dim)}
+
+/* Model provider label */
+.mprov{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.mprov-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.msrc{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--dim)}
+
+/* ── TASK TYPE BADGE ── */
+.ttbadge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.2);border-radius:8px;
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gemini);margin-bottom:16px}
+
+/* ── DIMENSION RATING ── */
+.dims{padding:22px 24px;background:var(--s1);border:1px solid var(--border);border-radius:16px;margin-top:16px}
+.dim-t{font-size:14px;font-weight:700;margin-bottom:4px}
+.dim-s{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.dim-rows{display:flex;flex-direction:column;gap:14px}
+.dim-row{display:flex;align-items:center;gap:16px}
+.dim-name{font-size:13px;font-weight:600;width:190px;flex-shrink:0}
+.stars{display:flex;gap:5px}
+.star{width:28px;height:28px;border-radius:7px;background:var(--s2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s}
+.star.on{background:rgba(245,158,11,.15);border-color:var(--review);color:var(--review)}
+
+/* ── REVEAL ── */
+#s-reveal{background:var(--bg)}
+.rv-hero{
+  text-align:center;padding:70px 24px 48px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(66,133,244,.12) 0%,transparent 70%);
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.rv-hero::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 20% 60%,rgba(217,119,87,.05) 0%,transparent 50%),
+             radial-gradient(circle at 80% 60%,rgba(16,163,127,.05) 0%,transparent 50%);
+}
+.rv-tag{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.rv-h1{font-family:var(--display);font-size:clamp(32px,5vw,70px);font-weight:900;letter-spacing:-.02em;line-height:1;margin-bottom:14px;position:relative;z-index:1}
+.rv-sub{font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500;position:relative;z-index:1}
+.rv-peer{display:inline-block;margin:0 auto 36px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--verified);padding:5px 16px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:100px;position:relative;z-index:1}
+
+/* ── SHARE CARD ── */
+.share-card{
+  max-width:400px;margin:0 auto 32px;
+  background:linear-gradient(135deg,#101018 0%,#0C0C18 100%);
+  border-radius:20px;padding:28px;position:relative;overflow:hidden;
+  box-shadow:0 32px 64px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+}
+.share-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(66,133,244,.2),transparent 70%)}
+.share-card::after{content:'';position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(16,163,127,.12),transparent 70%)}
+.sc-prof{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gemini);margin-bottom:4px;position:relative;z-index:1}
+.sc-title{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:-.01em;margin-bottom:20px;position:relative;z-index:1}
+.sc-winner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;margin-bottom:14px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.06)}
+.sc-trophy{font-size:20px}
+.sc-wl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.sc-wn{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em}
+.sc-task{font-size:11px;color:var(--dim);line-height:1.6;font-style:italic;border-left:2px solid var(--s3);padding-left:12px;margin-bottom:16px;position:relative;z-index:1}
+.sc-tt{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--gemini);letter-spacing:.08em;margin-bottom:4px;position:relative;z-index:1}
+.sc-foot{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.sc-brand{font-family:var(--display);font-size:13px;font-weight:700;color:var(--muted)}
+.sc-date{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.share-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+
+/* ── LEADERBOARD ── */
+#s-lb{background:var(--bg)}
+.lb-wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.lb-h{font-family:var(--display);font-size:clamp(36px,5vw,64px);font-weight:900;letter-spacing:-.02em;margin-bottom:8px}
+.lb-s{font-size:14px;color:var(--muted);margin-bottom:32px}
+.lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.lb-stat{padding:16px;background:var(--s1);border:1px solid var(--border);border-radius:12px}
+.lb-sv{font-family:var(--display);font-size:36px;font-weight:700;color:var(--gemini);letter-spacing:-.02em}
+.lb-sl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+.lb-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.lb-f{padding:6px 14px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-weight:600;color:var(--dim);background:transparent;cursor:pointer;font-family:var(--body);transition:all .15s}
+.lb-f:hover{border-color:var(--border2);color:var(--muted)}
+.lb-f.a{border-color:var(--gemini);color:var(--gemini);background:rgba(66,133,244,.08)}
+.lb-table{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px}
+.lb-row{display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);transition:background .15s}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--s2)}
+.lb-rank{font-family:var(--display);font-size:22px;font-weight:700;color:var(--dim);width:28px;text-align:center;flex-shrink:0}
+.lb-rank.g{color:var(--review)}
+.lb-mi{flex:1}
+.lb-mprov{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.lb-mname{font-size:14px;font-weight:700}
+.lb-msub{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.lb-bar{flex:1;max-width:100px}
+.lb-bt{height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
+.lb-bf{height:3px;border-radius:2px;transition:width .8s ease}
+.lb-votes{text-align:right;min-width:48px}
+.lb-vn{font-family:var(--display);font-size:24px;font-weight:700}
+.lb-vl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+.no-data{padding:48px;text-align:center;color:var(--dim);font-size:14px}
+
+/* ── ANIMATIONS ── */
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.fu{animation:fu .45s ease both}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.40s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  nav{padding:0 14px}
+  .h-features{grid-template-columns:1fr}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .sc-row{grid-template-columns:1fr}
+  .lb-stats{grid-template-columns:1fr 1fr}
+  .share-actions{flex-direction:column;align-items:center}
+  .dim-row{flex-wrap:wrap}
+  .dim-name{width:100%}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="n-logo" onclick="goTo('home')">
+    <div class="n-logo-dot"></div>
+    VANTAGE
+  </div>
+  <div class="n-steps">
+    <div class="n-step active" id="nb-v"><span class="dot"></span>Verify</div>
+    <div class="n-step" id="nb-t"><span class="dot"></span>Test</div>
+    <div class="n-step" id="nb-vo"><span class="dot"></span>Vote</div>
+    <div class="n-step" id="nb-r"><span class="dot"></span>Reveal</div>
+  </div>
+  <div class="n-right">
+    <div class="n-pill lb" onclick="goLB()">Leaderboard ↗</div>
+    <div class="n-pill" id="mode-pill" onclick="toggleMode()">MOCK</div>
+  </div>
+</nav>
+
+<!-- ══ HOME ═══════════════════════════════════════════════════════════ -->
+<div id="s-home" class="screen active">
+  <div class="h-eyebrow fu">Professional AI Benchmarking</div>
+  <h1 class="h-title fu d1">WHICH AI<br/><span class="line2">WORKS FOR</span><br/>YOUR JOB?</h1>
+  <p class="h-sub fu d2">Submit a real task from your work. Three AI models respond anonymously. Vote for the best. Find out who won — and help build the professional AI index.</p>
+  <div class="h-models fu d2" id="h-models">
+    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--gemini)"></div>Gemini 2.0 Flash</div>
+    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--openai)"></div>GPT-4o</div>
+    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--anthropic)"></div>Claude Sonnet</div>
+  </div>
+  <button class="h-cta fu d3" onclick="goTo('verify')">Start the test <span class="arr">→</span></button>
+  <p class="h-note fu d3">3 minutes · No account · Votes feed the live leaderboard</p>
+  <div class="h-features fu d4">
+    <div class="feat"><div class="feat-n">01 · VERIFY</div><div class="feat-t">Prove you're a professional</div><div class="feat-d">LinkedIn URL + real task. AI checks if your background matches. No OAuth, no stored data.</div></div>
+    <div class="feat"><div class="feat-n">02 · BLIND TEST</div><div class="feat-t">Three models, zero brand bias</div><div class="feat-d">GPT-4o vs Claude vs Gemini — anonymised as A, B, C. Your vote is honest.</div></div>
+    <div class="feat"><div class="feat-n">03 · REVEAL</div><div class="feat-t">Find out who actually won</div><div class="feat-d">Model names revealed. Rate the winner on profession-specific dimensions. Share your result.</div></div>
+  </div>
+</div>
+
+<!-- ══ VERIFY ═════════════════════════════════════════════════════════ -->
+<div id="s-verify" class="screen">
+<div class="wrap">
+  <div class="prog-wrap fu">
+    <div class="prog-bar"><div class="prog-fill" style="width:25%"></div></div>
+    <div class="prog-labels">
+      <span class="prog-lbl a">Verify</span>
+      <span class="prog-lbl" id="pl-t">Test</span>
+      <span class="prog-lbl" id="pl-v">Vote</span>
+      <span class="prog-lbl" id="pl-r">Reveal</span>
+    </div>
+  </div>
+  <h1 class="pg-h fu">Verify your identity</h1>
+  <p class="pg-s fu d1">Before your vote counts on the leaderboard, confirm you're a professional in the field you're evaluating.</p>
+  <div class="err" id="v-err" style="display:none"></div>
+  <div id="v-form">
+    <div class="field fu d1">
+      <label class="lbl">Your profession</label>
+      <div class="pgrid" id="pgrid"></div>
+    </div>
+    <div class="field fu d2">
+      <label class="lbl">LinkedIn profile URL <span class="lbl-n">· public profile · no login</span></label>
+      <input type="url" id="v-url" placeholder="https://www.linkedin.com/in/yourname"/>
+      <span class="hint">We scrape the public page — no OAuth, no login, no stored data.</span>
+    </div>
+    <div class="field fu d3">
+      <label class="lbl">A real task from your work <span class="lbl-n">· this week · remove identifying info</span></label>
+      <textarea id="v-task" placeholder="Paste a real task — the more domain-specific, the better your verification result." oninput="charCount('v-task','v-cc')"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="hint">AI checks if your task matches your profession.</span>
+        <span class="cc" id="v-cc">0 / 20</span>
+      </div>
+    </div>
+    <div class="tog fu d3" onclick="toggleMode()">
+      <div class="t-tr on" id="t-tr"><div class="t-th"></div></div>
+      <span class="t-lb">Mock mode</span>
+      <span class="t-nt" id="t-nt">No API key needed</span>
+    </div>
+    <div class="btn-row fu d4">
+      <button class="btn btn-p" onclick="runVerify()">Verify identity →</button>
+      <button class="btn btn-g" onclick="goTo('home')">← Back</button>
+    </div>
+  </div>
+  <div class="load" id="v-load" style="display:none">
+    <div class="ls"><div class="li p" id="vi1">1</div><div><div class="ll">Scraping LinkedIn profile</div><div class="ls-">Reading public page — no login required</div></div></div>
+    <div class="ls"><div class="li p" id="vi2">2</div><div><div class="ll">AI plausibility check</div><div class="ls-">Profile + task consistency analysis</div></div></div>
+    <div class="ls"><div class="li p" id="vi3">3</div><div><div class="ll">Assigning trust score</div><div class="ls-">Vote weight calculation</div></div></div>
+  </div>
+  <div class="vcard" id="v-result" style="display:none">
+    <div class="vh" id="vr-head">
+      <div style="flex:1"><div class="vt" id="vr-t"></div><div class="vr" id="vr-r"></div></div>
+      <div class="vbadge" id="vr-b"></div>
+    </div>
+    <div class="vb">
+      <div id="v-prof-wrap" style="display:none">
+        <div class="lbl" style="margin-bottom:8px">LinkedIn profile extracted</div>
+        <div class="prof-card" id="v-prof-card"></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:10px">Scores</div>
+        <div class="sc-row">
+          <div class="sc"><div class="sc-k">Confidence</div><div class="sc-tr"><div class="sc-fi" id="sf-c" style="background:var(--gemini)"></div></div><div class="sc-vl" id="sv-c"></div></div>
+          <div class="sc"><div class="sc-k">Trust score</div><div class="sc-tr"><div class="sc-fi" id="sf-t" style="background:var(--verified)"></div></div><div class="sc-vl" id="sv-t"></div></div>
+          <div class="sc"><div class="sc-k">Vote weight</div><div class="sc-tr"><div class="sc-fi" id="sf-v" style="background:var(--review)"></div></div><div class="sc-vl" id="sv-v"></div></div>
+        </div>
+      </div>
+      <div id="fl-wrap" style="display:none"><div class="lbl" style="margin-bottom:8px">Flags</div><div class="fl-list" id="fl-list"></div></div>
+      <div class="btn-row">
+        <button class="btn btn-p" id="v-proceed" onclick="goTo('taste')">Continue to blind test →</button>
+        <button class="btn btn-g" onclick="resetVerify()">Try again</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ TASTE TEST ══════════════════════════════════════════════════════ -->
+<div id="s-taste" class="screen">
+<div class="wrap">
+  <div class="prog-wrap fu">
+    <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
+    <div class="prog-labels">
+      <span class="prog-lbl d">Verify</span>
+      <span class="prog-lbl a">Test</span>
+      <span class="prog-lbl">Vote</span>
+      <span class="prog-lbl">Reveal</span>
+    </div>
+  </div>
+  <h1 class="pg-h fu">Blind taste test</h1>
+  <p class="pg-s fu d1">GPT-4o, Claude Sonnet, and Gemini respond to your task — as Model A, B, C. No names until after you vote.</p>
+  <div class="err" id="t-err" style="display:none"></div>
+  <div id="t-form">
+    <div class="field fu d1">
+      <label class="lbl">Your task <span class="lbl-n">· real work · anonymised</span></label>
+      <textarea id="t-task" placeholder="Paste a specific professional task. The more domain-specific, the more interesting the model comparison." oninput="charCount('t-task','t-cc')"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="hint">Sent to 3 models simultaneously. Remove names and identifying info first.</span>
+        <span class="cc" id="t-cc">0 / 20</span>
+      </div>
+    </div>
+    <div class="btn-row fu d2">
+      <button class="btn btn-p" id="t-btn" onclick="runTaste()">Send to 3 models →</button>
+      <button class="btn btn-g" onclick="goTo('verify')">← Back</button>
+    </div>
+  </div>
+  <div class="load" id="t-load" style="display:none">
+    <div class="ls"><div class="li p" id="ti1">1</div><div><div class="ll">Sending to GPT-4o, Claude, Gemini in parallel</div><div class="ls-">Model identities hidden — only labels shown</div></div></div>
+    <div class="ls"><div class="li p" id="ti2">2</div><div><div class="ll">Collecting responses</div><div class="ls-">Anonymising as Model A, B, C</div></div></div>
+    <div class="ls"><div class="li p" id="ti3">3</div><div><div class="ll">Ready for your evaluation</div><div class="ls-">Read carefully — no brand names shown</div></div></div>
+  </div>
+  <div id="t-resp" style="display:none">
+    <div class="ttbadge fu" id="tt-badge" style="display:none">🎯 <span id="tt-text"></span></div>
+    <p class="fu" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:12px">Three anonymous responses — select the best</p>
+    <div class="rgrid" id="rgrid"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-p" id="vote-btn" onclick="submitVote()" disabled>Vote for selected →</button>
+      <button class="btn btn-g" onclick="resetTaste()">Start over</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ REVEAL ═════════════════════════════════════════════════════════ -->
+<div id="s-reveal" class="screen">
+  <div class="rv-hero">
+    <p class="rv-tag fu">The Reveal</p>
+    <h2 class="rv-h1 fu d1">YOU PREFERRED<br/><span id="rv-model" style="color:var(--gemini)">—</span></h2>
+    <p class="rv-sub fu d2" id="rv-sub"></p>
+    <p class="rv-peer fu d3" id="rv-peer" style="display:none"></p>
+    <div class="share-card fu d3" id="sc">
+      <div class="sc-prof" id="sc-prof"></div>
+      <div class="sc-title">MY AI STACK · 2026</div>
+      <div class="sc-winner" id="sc-winner">
+        <div class="sc-trophy">🏆</div>
+        <div>
+          <div class="sc-wl" id="sc-wl"></div>
+          <div class="sc-wn" id="sc-wn"></div>
+        </div>
+      </div>
+      <div class="sc-tt" id="sc-tt"></div>
+      <div class="sc-task" id="sc-task"></div>
+      <div class="sc-foot"><div class="sc-brand">VANTAGE OF AI</div><div class="sc-date" id="sc-date"></div></div>
+    </div>
+    <div class="share-actions fu d4">
+      <button class="btn btn-p" onclick="copyShare()">📋 Copy share text</button>
+      <button class="btn btn-g" onclick="shareLinkedIn()">Share on LinkedIn</button>
+      <button class="btn btn-g" onclick="startOver()">Test another task</button>
+    </div>
+  </div>
+  <div class="wrap" style="padding-top:24px">
+    <div class="dims fu" id="dims">
+      <div class="dim-t">Rate the winner on these dimensions</div>
+      <div class="dim-s">Your structured ratings are what make Vantage different from a simple preference poll — they build the professional AI index.</div>
+      <div class="dim-rows" id="dim-rows"></div>
+      <div class="btn-row" style="margin-top:20px">
+        <button class="btn btn-v" onclick="submitDims()">Submit ratings →</button>
+      </div>
+    </div>
+    <div class="dims fu d1" id="dims-done" style="display:none">
+      <div class="dim-t" style="color:var(--verified)">✓ Ratings submitted</div>
+      <div class="dim-s">Your vote is now part of the leaderboard.</div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-p" onclick="goLB()">See leaderboard ↗</button>
+      </div>
+    </div>
+    <div style="margin-top:32px">
+      <p style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:14px">All three responses — revealed</p>
+      <div class="rgrid" id="rv-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEADERBOARD ════════════════════════════════════════════════════ -->
+<div id="s-lb" class="screen">
+<div class="lb-wrap">
+  <h1 class="lb-h fu">Leaderboard</h1>
+  <p class="lb-s fu d1">Aggregated votes from verified professionals. Real time.</p>
+  <div class="lb-stats fu d1">
+    <div class="lb-stat"><div class="lb-sv" id="lb-votes">—</div><div class="lb-sl">Total votes</div></div>
+    <div class="lb-stat"><div class="lb-sv" id="lb-sess">—</div><div class="lb-sl">Sessions run</div></div>
+    <div class="lb-stat"><div class="lb-sv" id="lb-profs">—</div><div class="lb-sl">Professions</div></div>
+  </div>
+  <div class="lb-filters fu d2" id="lb-filters"></div>
+  <div class="lb-table fu d3" id="lb-table"><div class="no-data">Loading...</div></div>
+  <div class="btn-row fu d3">
+    <button class="btn btn-g" onclick="goTo('home')">← Home</button>
+    <button class="btn btn-p" onclick="goTo('verify')">Run a test →</button>
+  </div>
+</div>
+</div>
+
+<script>
+const API = "http://localhost:8000";
+let useMock = true;
+let selProf = "";
+let sessionId = null;
+let selIdx = null;
+let voteData = null;
+let dimRatings = {};
+let profDims = [];
+let taskType = "";
+let PROFS = [];
+
+// ── Profession list ────────────────────────────────────────────────────
+async function loadProfs() {
+  try {
+    const r = await fetch(`${API}/professions`);
+    PROFS = Object.keys(await r.json());
+  } catch {
+    PROFS = ["Data Scientist","Software Engineer","ML Engineer","Contract Attorney",
+             "Financial Analyst","Product Manager","Marketing Manager","UX Designer",
+             "Accountant / CPA","HR Manager","Radiologist","Journalist"];
+  }
+  const g = document.getElementById('pgrid');
+  g.innerHTML = PROFS.map(p =>
+    `<div class="pc" onclick="selP(this,'${p}')">${p}</div>`
+  ).join('');
+}
+
+function selP(el, val) {
+  document.querySelectorAll('.pc').forEach(c => c.classList.remove('s'));
+  el.classList.add('s');
+  selProf = val;
+}
+
+// ── Mode ───────────────────────────────────────────────────────────────
+function toggleMode() {
+  useMock = !useMock;
+  const tr = document.getElementById('t-tr');
+  const nt = document.getElementById('t-nt');
+  const pill = document.getElementById('mode-pill');
+  if (useMock) {
+    tr?.classList.add('on'); nt.textContent = 'No API key needed';
+    pill.textContent = 'MOCK'; pill.className = 'n-pill';
+  } else {
+    tr?.classList.remove('on'); nt.textContent = 'Using real APIs';
+    pill.textContent = 'LIVE'; pill.className = 'n-pill live';
+  }
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','in'); });
+  const t = document.getElementById(`s-${id}`);
+  if (!t) return;
+  t.classList.add('active');
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('in')));
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const order = ['v','t','vo','r'];
+  const map = {verify:'v',taste:'t',reveal:'r'};
+  const idx = order.indexOf(map[id]??'');
+  order.forEach((k,i) => {
+    const el = document.getElementById(`nb-${k}`);
+    if (!el) return;
+    el.className = 'n-step' + (i < idx ? ' done' : i === idx ? ' active' : '');
+  });
+
+  if (id === 'taste') {
+    const vt = document.getElementById('v-task').value;
+    const tt = document.getElementById('t-task');
+    if (vt && !tt.value) { tt.value = vt; charCount('t-task','t-cc'); }
+  }
+  if (id === 'lb') loadLB();
+}
+
+function goLB() { goTo('lb'); }
+
+// Show home immediately
+requestAnimationFrame(() => document.getElementById('s-home').classList.add('in'));
+
+// ── Utils ──────────────────────────────────────────────────────────────
+function charCount(src, dst) {
+  const n = document.getElementById(src).value.trim().length;
+  const el = document.getElementById(dst);
+  el.textContent = `${n} / 20`;
+  el.className = 'cc' + (n >= 20 ? ' ok' : '');
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function setLI(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `li ${state === 'p' ? 'p' : state === 'r' ? 'r' : 'd'}`;
+  if (state === 'd') el.textContent = '✓';
+}
+function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+function esc(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── VERIFY ─────────────────────────────────────────────────────────────
+async function runVerify() {
+  hideErr('v-err');
+  const url = document.getElementById('v-url').value.trim();
+  const task = document.getElementById('v-task').value.trim();
+  if (!selProf) return showErr('v-err','Please select your profession.');
+  if (!url) return showErr('v-err','Please enter your LinkedIn URL.');
+  if (!url.startsWith('https://www.linkedin.com/in/')) return showErr('v-err','URL must start with https://www.linkedin.com/in/');
+  if (task.length < 20) return showErr('v-err','Task must be at least 20 characters.');
+
+  document.getElementById('v-form').style.display = 'none';
+  document.getElementById('v-load').style.display = 'flex';
+  document.getElementById('v-result').style.display = 'none';
+
+  setLI('vi1','r'); await sleep(useMock ? 700 : 3000);
+  setLI('vi1','d'); setLI('vi2','r'); await sleep(useMock ? 600 : 3500);
+  setLI('vi2','d'); setLI('vi3','r');
+
+  let data;
+  try {
+    const res = await fetch(`${API}/verify`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({linkedin_url:url, claimed_profession:selProf, submitted_task:task, use_mock:useMock})
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('v-load').style.display = 'none';
+    document.getElementById('v-form').style.display = 'block';
+    return showErr('v-err', `Error: ${e.message}. Is the backend running on port 8000?`);
+  }
+
+  await sleep(300); setLI('vi3','d'); await sleep(200);
+  profDims = data.dimensions || [];
+
+  document.getElementById('v-load').style.display = 'none';
+  document.getElementById('v-result').style.display = 'block';
+
+  // Verdict
+  const head = document.getElementById('vr-head');
+  head.className = `vh ${data.verdict}`;
+  const badge = document.getElementById('vr-b');
+  badge.className = `vbadge ${data.verdict}`;
+  badge.textContent = data.verdict.toUpperCase();
+  document.getElementById('vr-t').textContent = {verified:'Identity verified ✓', review:'Needs human review', flagged:'Verification failed'}[data.verdict];
+  document.getElementById('vr-r').textContent = data.reasoning;
+
+  // Scores
+  const p = v => `${Math.round(v*100)}%`;
+  document.getElementById('sv-c').textContent = p(data.confidence);
+  document.getElementById('sf-c').style.width = p(data.confidence);
+  document.getElementById('sv-t').textContent = (data.trust_score||0).toFixed(2);
+  document.getElementById('sf-t').style.width = p(data.trust_score||0);
+  document.getElementById('sv-v').textContent = `${data.vote_weight||0.5}x`;
+  document.getElementById('sf-v').style.width = p(data.vote_weight||0.5);
+
+  // LinkedIn profile card
+  if (data.profile && data.profile.scrape_success) {
+    const prof = data.profile;
+    const initial = (prof.name || selProf).charAt(0).toUpperCase();
+    document.getElementById('v-prof-wrap').style.display = 'block';
+    document.getElementById('v-prof-card').innerHTML = `
+      <div class="prof-avatar">${initial}</div>
+      <div>
+        <div class="prof-name">${prof.name || 'Profile found'}</div>
+        <div class="prof-headline">${prof.headline || prof.current_role || selProf}</div>
+      </div>
+      <div class="prof-badge">${prof.scrape_method === 'mock' ? 'MOCK' : 'SCRAPED'}</div>
+    `;
+  }
+
+  // Flags
+  if (data.flags?.length) {
+    document.getElementById('fl-wrap').style.display = 'block';
+    document.getElementById('fl-list').innerHTML = data.flags.map(f => `<div class="fl">⚠ ${f}</div>`).join('');
+  }
+
+  if (data.verdict === 'flagged') {
+    const btn = document.getElementById('v-proceed');
+    btn.disabled = true; btn.textContent = 'Cannot proceed';
+  }
+}
+
+function resetVerify() {
+  document.getElementById('v-result').style.display = 'none';
+  document.getElementById('v-form').style.display = 'block';
+  document.getElementById('fl-wrap').style.display = 'none';
+  document.getElementById('v-prof-wrap').style.display = 'none';
+  document.getElementById('v-proceed').disabled = false;
+  document.getElementById('v-proceed').textContent = 'Continue to blind test →';
+  ['vi1','vi2','vi3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+}
+
+// ── TASTE TEST ─────────────────────────────────────────────────────────
+async function runTaste() {
+  hideErr('t-err');
+  const task = document.getElementById('t-task').value.trim();
+  if (task.length < 20) return showErr('t-err','Task must be at least 20 characters.');
+
+  document.getElementById('t-form').style.display = 'none';
+  document.getElementById('t-load').style.display = 'flex';
+  document.getElementById('t-resp').style.display = 'none';
+  selIdx = null;
+
+  setLI('ti1','r'); await sleep(useMock ? 700 : 2000);
+  setLI('ti1','d'); setLI('ti2','r'); await sleep(useMock ? 500 : 5000);
+  setLI('ti2','d'); setLI('ti3','r');
+
+  let data;
+  try {
+    const res = await fetch(`${API}/taste-test`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({task, profession:selProf||'Data Scientist', use_mock:useMock})
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    data = await res.json();
+  } catch(e) {
+    document.getElementById('t-load').style.display = 'none';
+    document.getElementById('t-form').style.display = 'block';
+    return showErr('t-err', `Error: ${e.message}`);
+  }
+
+  sessionId = data.session_id;
+  taskType = data.task_type || '';
+  if (data.profession_dimensions) profDims = data.profession_dimensions;
+
+  await sleep(300); setLI('ti3','d'); await sleep(200);
+  document.getElementById('t-load').style.display = 'none';
+
+  if (taskType) {
+    document.getElementById('tt-badge').style.display = 'inline-flex';
+    document.getElementById('tt-text').textContent = taskType;
+  }
+
+  renderRespCards(data.responses);
+}
+
+function renderRespCards(responses) {
+  document.getElementById('t-resp').style.display = 'block';
+  document.getElementById('rgrid').innerHTML = responses.map((r,i) => `
+    <div class="rc fu" id="rc-${i}" onclick="selR(${i})" style="animation-delay:${i*.1}s">
+      <div class="rh">
+        <span class="rl">${r.label}</span>
+        <span class="rtype">${taskType || 'Professional task'}</span>
+        <span class="rsel">Select →</span>
+      </div>
+      <div class="rbody">${esc(r.response)}</div>
+    </div>
+  `).join('');
+}
+
+function selR(idx) {
+  selIdx = idx;
+  document.querySelectorAll('.rc').forEach((c,i) => c.classList.toggle('sel', i===idx));
+  document.getElementById('vote-btn').disabled = false;
+}
+
+function resetTaste() {
+  document.getElementById('t-resp').style.display = 'none';
+  document.getElementById('t-form').style.display = 'block';
+  ['ti1','ti2','ti3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+}
+
+// ── VOTE ───────────────────────────────────────────────────────────────
+async function submitVote() {
+  if (selIdx === null) return;
+  const btn = document.getElementById('vote-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  try {
+    const res = await fetch(`${API}/vote`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({session_id:sessionId, chosen_index:selIdx})
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    voteData = await res.json();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Vote for selected →';
+    return showErr('t-err', `Error: ${e.message}`);
+  }
+
+  renderReveal(voteData);
+  goTo('reveal');
+}
+
+// ── REVEAL ─────────────────────────────────────────────────────────────
+function renderReveal(d) {
+  const color = d.winner_color || 'var(--gemini)';
+  document.getElementById('rv-model').textContent = d.winner_model;
+  document.getElementById('rv-model').style.color = color;
+  document.getElementById('rv-sub').textContent = d.surprise_message;
+
+  const peer = document.getElementById('rv-peer');
+  if (d.peer_comparison) { peer.style.display = 'inline-block'; peer.textContent = d.peer_comparison; }
+
+  // Share card
+  document.getElementById('sc-prof').textContent = (selProf||'Professional').toUpperCase();
+  const winner = d.reveal.find(r => r.won);
+  const sc = document.getElementById('sc-winner');
+  sc.style.background = `rgba(${hexToRgb(color.replace('var(--gemini)','#4285F4'))},0.1)`;
+  sc.style.borderColor = `rgba(${hexToRgb(color.replace('var(--gemini)','#4285F4'))},0.25)`;
+  document.getElementById('sc-wl').style.color = color;
+  document.getElementById('sc-wl').textContent = winner?.provider?.toUpperCase() + ' · TOP MODEL';
+  document.getElementById('sc-wn').textContent = d.winner_model;
+  document.getElementById('sc-tt').textContent = d.scorecard.task_type;
+  document.getElementById('sc-task').textContent = d.scorecard.task_preview;
+  document.getElementById('sc-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
+
+  // Dimension rating
+  const reveal = d.reveal;
+  dimRatings = {};
+  if (profDims.length > 0) {
+    document.getElementById('dim-rows').innerHTML = profDims.map((dim,di) => `
+      <div class="dim-row">
+        <div class="dim-name">${dim}</div>
+        <div class="stars">${[1,2,3,4,5].map(s =>
+          `<div class="star" id="star-${di}-${s}" onclick="rateDim('${dim}',${s},${di})">★</div>`
+        ).join('')}</div>
+      </div>
+    `).join('');
+  }
+
+  // Reveal grid — show provider branding
+  document.getElementById('rv-grid').innerHTML = reveal.map((r,i) => `
+    <div class="rc ${r.won ? 'won' : 'lost'} fu" style="animation-delay:${i*.1}s;cursor:default">
+      <div class="rh">
+        <span class="rl">${r.label}</span>
+        <div class="mprov">
+          <div class="mprov-dot" style="background:${r.color||'#888'}"></div>
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${r.model_name}</span>
+          <span class="mprov" style="font-size:11px;color:var(--dim)">${r.provider}</span>
+          ${r.source !== 'mock' ? '<span class="msrc">LIVE</span>' : '<span class="msrc">MOCK</span>'}
+        </div>
+        <span class="wtag ${r.won ? 'y' : 'n'}">${r.won ? '🏆 Your pick' : 'Not selected'}</span>
+      </div>
+      <div class="rbody">${esc(r.response)}</div>
+    </div>
+  `).join('');
+}
+
+function hexToRgb(hex) {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex||'#4285F4');
+  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '66,133,244';
+}
+
+function rateDim(dim, score, di) {
+  dimRatings[dim] = score;
+  [1,2,3,4,5].forEach(s => {
+    const el = document.getElementById(`star-${di}-${s}`);
+    if (el) el.classList.toggle('on', s <= score);
+  });
+}
+
+async function submitDims() {
+  if (Object.keys(dimRatings).length === 0) return;
+  try {
+    await fetch(`${API}/rate-dimensions`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({session_id:sessionId, ratings:dimRatings})
+    });
+  } catch(e) {}
+  document.getElementById('dims').style.display = 'none';
+  document.getElementById('dims-done').style.display = 'block';
+}
+
+function copyShare() {
+  if (!voteData) return;
+  navigator.clipboard.writeText(voteData.scorecard.share_text).then(() => {
+    const btn = document.querySelector('.share-actions .btn-p');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+function shareLinkedIn() {
+  if (!voteData) return;
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://vantageofai.com&summary=${encodeURIComponent(voteData.scorecard.share_text)}`, '_blank');
+}
+
+function startOver() {
+  sessionId = null; selIdx = null; voteData = null;
+  document.getElementById('t-task').value = '';
+  document.getElementById('t-resp').style.display = 'none';
+  document.getElementById('t-form').style.display = 'block';
+  document.getElementById('dims').style.display = 'block';
+  document.getElementById('dims-done').style.display = 'none';
+  document.getElementById('rv-peer').style.display = 'none';
+  charCount('t-task','t-cc');
+  ['ti1','ti2','ti3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+  goTo('taste');
+}
+
+// ── LEADERBOARD ────────────────────────────────────────────────────────
+const MODEL_COLORS = {'Gemini 2.0 Flash':'#4285F4','GPT-4o':'#10A37F','Claude Sonnet':'#D97757'};
+
+async function loadLB(prof = null) {
+  const url = prof ? `${API}/leaderboard?profession=${encodeURIComponent(prof)}` : `${API}/leaderboard`;
+  try {
+    const res = await fetch(url);
+    renderLB(await res.json(), prof);
+  } catch {
+    document.getElementById('lb-table').innerHTML = `<div class="no-data">Backend not reachable — is it running on port 8000?</div>`;
+  }
+}
+
+function renderLB(d, prof) {
+  document.getElementById('lb-votes').textContent = d.total_votes;
+  document.getElementById('lb-sess').textContent = d.total_sessions;
+  document.getElementById('lb-profs').textContent = Object.keys(d.by_profession||{}).length;
+
+  const profs = Object.keys(d.by_profession||{});
+  document.getElementById('lb-filters').innerHTML =
+    `<button class="lb-f ${prof ? '' : 'a'}" onclick="loadLB()">All professions</button>` +
+    profs.map(p => `<button class="lb-f ${prof===p?'a':''}" onclick="loadLB('${p}')">${p}</button>`).join('');
+
+  const table = document.getElementById('lb-table');
+  if (!d.rankings?.length) {
+    table.innerHTML = `<div class="no-data">No votes yet. Run a test to be the first! 🚀</div>`; return;
+  }
+
+  const max = d.rankings[0]?.total_votes || 1;
+  table.innerHTML = d.rankings.map(r => {
+    const color = MODEL_COLORS[r.model] || '#888';
+    return `
+    <div class="lb-row">
+      <div class="lb-rank ${r.rank<=3?'g':''}">${r.rank}</div>
+      <div class="lb-mi">
+        <div class="lb-mprov">
+          <div class="mprov-dot" style="background:${color};width:8px;height:8px;border-radius:50%"></div>
+          <div class="lb-mname">${r.model}</div>
+        </div>
+        <div class="lb-msub">${r.provider || ''} · ${r.rank===1?'🏆 Leading':r.total_votes+' vote'+(r.total_votes!==1?'s':'')}</div>
+      </div>
+      <div class="lb-bar">
+        <div class="lb-bt"><div class="lb-bf" style="width:${Math.round((r.total_votes/max)*100)}%;background:${color}"></div></div>
+      </div>
+      <div class="lb-votes">
+        <div class="lb-vn">${r.total_votes}</div>
+        <div class="lb-vl">votes</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Init
+loadProfs();
+</script>
+</body>
+</html>
