@@ -399,6 +399,10 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
   </div>
   <button class="h-cta fu d3" onclick="goTo('verify')">Start the test <span class="arr">→</span></button>
   <p class="h-note fu d3">3 minutes · No account · Votes feed the live leaderboard</p>
+  <div class="live-counter fu d4" id="live-counter" style="display:none;margin-top:28px;max-width:600px">
+    <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;text-align:center">Live votes by profession</div>
+    <div id="lc-pills" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+  </div>
   <div class="h-features fu d4">
     <div class="feat"><div class="feat-n">01 · VERIFY</div><div class="feat-t">Prove you're a professional</div><div class="feat-d">LinkedIn URL + real task. AI checks if your background matches. No OAuth, no stored data.</div></div>
     <div class="feat"><div class="feat-n">02 · BLIND TEST</div><div class="feat-t">Three models, zero brand bias</div><div class="feat-d">GPT-4o vs Claude vs Gemini — anonymised as A, B, C. Your vote is honest.</div></div>
@@ -598,7 +602,7 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 </div>
 
 <script>
-const API = "http://localhost:8000";
+const API = "http://localhost:8000"; // Change to https://vantage-api-7mc2.onrender.com for production
 let useMock = true;
 let selProf = "";
 let sessionId = null;
@@ -695,6 +699,28 @@ function showErr(id, msg) { const e = document.getElementById(id); e.textContent
 function hideErr(id) { document.getElementById(id).style.display = 'none'; }
 function esc(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ── Live counter ───────────────────────────────────────────────────────
+async function loadLiveCounter() {
+  try {
+    const res = await fetch(`${API}/stats`);
+    const d = await res.json();
+    if (!d.by_profession?.length) return;
+    const wrap = document.getElementById('live-counter');
+    const pills = document.getElementById('lc-pills');
+    wrap.style.display = 'block';
+    pills.innerHTML = d.by_profession.slice(0,8).map(p =>
+      `<div style="padding:5px 12px;background:var(--s2);border:1px solid var(--border);border-radius:100px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+        <span style="color:var(--text)">${p.profession}</span>
+        <span style="color:var(--gemini);font-family:var(--mono)">${p.count}</span>
+      </div>`
+    ).join('');
+  } catch {}
+}
+
+// Poll every 30s
+loadLiveCounter();
+setInterval(loadLiveCounter, 30000);
+
 // ── VERIFY ─────────────────────────────────────────────────────────────
 async function runVerify() {
   hideErr('v-err');
@@ -772,6 +798,18 @@ async function runVerify() {
     document.getElementById('fl-list').innerHTML = data.flags.map(f => `<div class="fl">⚠ ${f}</div>`).join('');
   }
 
+  // PII indicator
+  if (data.pii_masked) {
+    const existing = document.getElementById('pii-note');
+    if (!existing) {
+      const note = document.createElement('div');
+      note.id = 'pii-note';
+      note.style.cssText = 'padding:9px 13px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:12px;color:var(--verified);font-weight:500';
+      note.textContent = '🔒 PII automatically masked before sending to AI models';
+      document.getElementById('fl-wrap').insertAdjacentElement('afterend', note);
+    }
+  }
+
   if (data.verdict === 'flagged') {
     const btn = document.getElementById('v-proceed');
     btn.disabled = true; btn.textContent = 'Cannot proceed';
@@ -839,6 +877,7 @@ function renderRespCards(responses) {
       <div class="rh">
         <span class="rl">${r.label}</span>
         <span class="rtype">${taskType || 'Professional task'}</span>
+        ${r.latency_ms ? `<span style="font-family:var(--mono);font-size:10px;color:var(--dim)">${Math.round(r.latency_ms)}ms</span>` : ''}
         <span class="rsel">Select →</span>
       </div>
       <div class="rbody">${esc(r.response)}</div>
@@ -890,6 +929,19 @@ function renderReveal(d) {
   const peer = document.getElementById('rv-peer');
   if (d.peer_comparison) { peer.style.display = 'inline-block'; peer.textContent = d.peer_comparison; }
 
+  // Bias flags warning
+  const biasFlags = d.reveal?.flatMap(r => r.bias?.flags || []) || [];
+  if (biasFlags.length > 0) {
+    const existing = document.getElementById('bias-warn');
+    if (!existing) {
+      const warn = document.createElement('div');
+      warn.id = 'bias-warn';
+      warn.style.cssText = 'display:inline-block;margin:0 auto 20px;font-size:11px;font-weight:600;color:var(--review);padding:5px 16px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:100px;position:relative;z-index:1';
+      warn.textContent = `⚠ Bias check flagged ${biasFlags.length} item(s) in responses`;
+      peer.insertAdjacentElement('afterend', warn);
+    }
+  }
+
   // Share card
   document.getElementById('sc-prof').textContent = (selProf||'Professional').toUpperCase();
   const winner = d.reveal.find(r => r.won);
@@ -902,6 +954,23 @@ function renderReveal(d) {
   document.getElementById('sc-tt').textContent = d.scorecard.task_type;
   document.getElementById('sc-task').textContent = d.scorecard.task_preview;
   document.getElementById('sc-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
+
+  // PCI score badge
+  if (d.pci_score) {
+    const existing = document.getElementById('pci-badge');
+    if (!existing) {
+      const badge = document.createElement('div');
+      badge.id = 'pci-badge';
+      badge.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.2);border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gemini);margin-bottom:16px';
+      badge.innerHTML = `PCI Score: ${(d.pci_score * 100).toFixed(1)} · <span style="color:var(--muted)">Prova Composite Index</span>`;
+      document.getElementById('rv-peer').insertAdjacentElement('afterend', badge);
+    }
+  }
+
+  // Shareable URL — update browser URL without reload
+  if (d.session_id) {
+    history.replaceState({}, '', `#scorecard/${d.session_id}`);
+  }
 
   // Dimension rating
   const reveal = d.reveal;
@@ -917,7 +986,7 @@ function renderReveal(d) {
     `).join('');
   }
 
-  // Reveal grid — show provider branding
+  // Reveal grid — show provider branding + latency
   document.getElementById('rv-grid').innerHTML = reveal.map((r,i) => `
     <div class="rc ${r.won ? 'won' : 'lost'} fu" style="animation-delay:${i*.1}s;cursor:default">
       <div class="rh">
@@ -928,6 +997,7 @@ function renderReveal(d) {
           <span class="mprov" style="font-size:11px;color:var(--dim)">${r.provider}</span>
           ${r.source !== 'mock' ? '<span class="msrc">LIVE</span>' : '<span class="msrc">MOCK</span>'}
         </div>
+        ${r.latency_ms ? `<span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto">${Math.round(r.latency_ms)}ms</span>` : ''}
         <span class="wtag ${r.won ? 'y' : 'n'}">${r.won ? '🏆 Your pick' : 'Not selected'}</span>
       </div>
       <div class="rbody">${esc(r.response)}</div>
@@ -962,7 +1032,10 @@ async function submitDims() {
 
 function copyShare() {
   if (!voteData) return;
-  navigator.clipboard.writeText(voteData.scorecard.share_text).then(() => {
+  const text = voteData.scorecard.share_url
+    ? `${voteData.scorecard.share_text}`
+    : voteData.scorecard.share_text;
+  navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.share-actions .btn-p');
     const orig = btn.textContent;
     btn.textContent = '✓ Copied!';
