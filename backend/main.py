@@ -1,23 +1,22 @@
 """
-Vantage of AI — Backend v7
+Vantage of AI — Backend v9
 ===========================
-New in v7:
-  - User accounts: email/password + Google OAuth
-  - JWT authentication (access + refresh tokens)
-  - User history — past sessions linked to account
-  - Trust score accumulates across sessions per user
-  - Protected leaderboard votes (must be logged in)
-  - Public leaderboard with trend data for charts
+New in v9:
+  - RAG pipeline — task enriched with retrieved professional context
+  - File upload — any file type, extracted text injected into model prompt
+  - /models page data endpoint — SEO content for public models page
+  - Improved taste-test with file context mode (context vs reference)
 
 Install:
   pip install fastapi uvicorn google-genai openai anthropic python-dotenv
-      passlib[bcrypt] python-jose[cryptography] httpx
+      passlib[bcrypt] python-jose[cryptography] httpx Pillow PyPDF2
+      python-docx openpyxl
 
 Run:
   uvicorn main:app --reload --port 8000
 """
 
-import os, json, asyncio, uuid, random, sqlite3, re, time, logging, math, hashlib
+import os, json, asyncio, uuid, random, sqlite3, re, time, logging, math, hashlib, base64
 from datetime import datetime, timedelta
 from typing import Optional
 from contextlib import contextmanager
@@ -25,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -33,6 +32,17 @@ from pydantic import BaseModel, EmailStr
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s — %(message)s")
 logger = logging.getLogger("vantage")
+
+# Import RAG pipeline and file processor
+try:
+    from rag import rag
+    from file_processor import extract_text, build_file_context
+    logger.info("✓ RAG pipeline and file processor loaded")
+except ImportError as e:
+    logger.warning("RAG/file processor not available: %s", e)
+    rag = None
+    def extract_text(b, f, m=""): return "", "unavailable"
+    def build_file_context(t, f, m): return f"[File: {f}]\n{t}\n"
 
 app = FastAPI(title="Vantage of AI", version="7.0.0")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -405,6 +415,8 @@ class TasteTestRequest(BaseModel):
     profession: str
     session_id: Optional[str] = None
     use_mock: bool = True
+    file_id: Optional[str] = None        # from /upload endpoint
+    file_mode: Optional[str] = "context" # "context" or "reference"
 
 class VoteRequest(BaseModel):
     session_id: str
@@ -628,7 +640,26 @@ async def taste_test(req: TasteTestRequest, user = Depends(get_current_user)):
     session_id = req.session_id or str(uuid.uuid4())
     task_masked, pii_count = mask_pii(req.task)
     system = get_system_prompt(req.profession)
-    user_msg = USER_TEMPLATE.replace("{task}", task_masked)
+
+    # RAG enrichment
+    rag_contexts = []
+    enriched_task = task_masked
+    if rag and not req.use_mock:
+        try:
+            enriched_task, rag_contexts = await rag.enrich(task_masked, req.profession)
+        except Exception as e:
+            logger.debug("RAG enrichment failed: %s", e)
+
+    # File context injection
+    file_prefix = ""
+    file_info = None
+    if req.file_id and req.file_id in _file_cache:
+        cached = _file_cache[req.file_id]
+        file_prefix = build_file_context(cached["text"], cached["filename"], req.file_mode or "context")
+        file_info = {"filename": cached["filename"], "mode": req.file_mode or "context", "chars": len(cached["text"])}
+
+    # Build user message
+    user_msg = file_prefix + USER_TEMPLATE.replace("{task}", enriched_task)
 
     models = DEFAULT_MODELS.copy()
     random.shuffle(models)
@@ -660,11 +691,21 @@ async def taste_test(req: TasteTestRequest, user = Depends(get_current_user)):
              pii_count, json.dumps(all_bias), datetime.utcnow().isoformat()))
 
     blind = [{"label":r["label"],"response":r["response"],"latency_ms":r["latency_ms"]} for r in responses]
-    return {"session_id":session_id,"responses":blind,"task_type":task_type,
-            "profession_dimensions":PROFESSIONS[req.profession]["dimensions"],
-            "pii_masked":pii_count>0,"bias_flags":all_bias,
-            "model_status":[{"display":MODEL_REGISTRY[m]["display"],"provider":MODEL_REGISTRY[m]["provider"],
-                              "live":is_available(m),"color":MODEL_REGISTRY[m]["color"]} for m in MODEL_REGISTRY]}
+    return {
+        "session_id": session_id,
+        "responses": blind,
+        "task_type": task_type,
+        "profession_dimensions": PROFESSIONS[req.profession]["dimensions"],
+        "pii_masked": pii_count > 0,
+        "pii_count": pii_count,
+        "bias_flags": all_bias,
+        "rag_used": len(rag_contexts) > 0,
+        "rag_contexts": [{"profession":c["profession"],"topic":c["topic"]} for c in rag_contexts],
+        "file_used": file_info is not None,
+        "file_info": file_info,
+        "model_status": [{"display":MODEL_REGISTRY[m]["display"],"provider":MODEL_REGISTRY[m]["provider"],
+                          "live":is_available(m),"color":MODEL_REGISTRY[m]["color"]} for m in MODEL_REGISTRY],
+    }
 
 @app.post("/vote")
 def vote(req: VoteRequest, user = Depends(get_current_user)):
@@ -733,6 +774,112 @@ def rate_dimensions(req: DimensionRatingRequest, user = Depends(get_current_user
                  row["winner_model"], dim, score, datetime.utcnow().isoformat()))
         conn.execute("UPDATE sessions SET dimension_scores=? WHERE id=?", (json.dumps(req.ratings),req.session_id))
     return {"status":"ok","ratings_saved":len(req.ratings)}
+
+@app.post("/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    user = Depends(get_current_user)
+):
+    """
+    Upload a file for context injection in taste test.
+    Returns extracted text and a file_id to reference in taste-test.
+    Max 10MB. Any file type supported.
+    """
+    MAX_SIZE = 10 * 1024 * 1024  # 10MB
+
+    content = await file.read()
+    if len(content) > MAX_SIZE:
+        raise HTTPException(400, "File too large — maximum 10MB")
+
+    filename = file.filename or "uploaded_file"
+    mime_type = file.content_type or ""
+
+    # Extract text
+    text, method = extract_text(content, filename, mime_type)
+
+    if not text.strip():
+        raise HTTPException(400, "Could not extract text from this file. Try a different format.")
+
+    # Store temporarily with a file_id (in-memory for now, Redis in production)
+    file_id = uuid.uuid4().hex
+    _file_cache[file_id] = {
+        "filename": filename,
+        "text": text,
+        "method": method,
+        "size": len(content),
+        "uploaded_at": datetime.utcnow().isoformat(),
+        "user_id": user["id"] if user else None,
+    }
+
+    return {
+        "file_id": file_id,
+        "filename": filename,
+        "extraction_method": method,
+        "chars_extracted": len(text),
+        "preview": text[:200] + "..." if len(text) > 200 else text,
+    }
+
+# In-memory file cache (use Redis in production)
+_file_cache: dict = {}
+
+@app.get("/models-data")
+def models_data():
+    """
+    Data endpoint for the public /models SEO page.
+    Returns all models with PCI scores per profession.
+    """
+    with get_db() as conn:
+        total_sessions = conn.execute("SELECT COUNT(*) FROM sessions WHERE vote IS NOT NULL").fetchone()[0]
+        model_prof = conn.execute("""
+            SELECT winner_model, profession, COUNT(*) as wins
+            FROM sessions WHERE vote IS NOT NULL AND winner_model IS NOT NULL
+            GROUP BY winner_model, profession
+        """).fetchall()
+        dim_scores = conn.execute("""
+            SELECT winner_model, dimension, AVG(score) as avg, COUNT(*) as n
+            FROM dimension_ratings GROUP BY winner_model, dimension
+        """).fetchall()
+
+    # Build per-model per-profession PCI
+    results = {}
+    for m_id, m_info in MODEL_REGISTRY.items():
+        display = m_info["display"]
+        results[display] = {
+            "id": m_id,
+            "display": display,
+            "provider": m_info["provider"],
+            "color": m_info["color"],
+            "live": is_available(m_id),
+            "context_window": m_info.get("context_window", 128000),
+            "by_profession": {},
+            "dimensions": {},
+            "overall_pci": compute_pci(display, 0, max(total_sessions, 1)),
+        }
+
+    for row in model_prof:
+        m = row["winner_model"]
+        if m not in results: continue
+        prof = row["profession"]
+        pci = compute_pci(m, row["wins"], total_sessions)
+        results[m]["by_profession"][prof] = {
+            "wins": row["wins"],
+            "pci": pci,
+        }
+
+    for row in dim_scores:
+        m = row["winner_model"]
+        if m not in results: continue
+        results[m]["dimensions"][row["dimension"]] = {
+            "avg": round(row["avg"], 2),
+            "n": row["n"],
+        }
+
+    return {
+        "models": list(results.values()),
+        "total_votes": total_sessions,
+        "professions": list(PROFESSIONS.keys()),
+        "generated_at": datetime.utcnow().isoformat(),
+    }
 
 @app.get("/leaderboard")
 def leaderboard(profession: Optional[str] = None):

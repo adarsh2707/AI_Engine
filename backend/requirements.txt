@@ -8,3 +8,7 @@ passlib[bcrypt]
 python-jose[cryptography]
 httpx
 Pillow
+PyPDF2
+python-docx
+openpyxl
+python-multipart

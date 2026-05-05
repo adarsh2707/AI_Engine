@@ -492,6 +492,40 @@ select option{background:var(--white)}
 .hi-wn{font-size:12px;font-weight:600;color:var(--ink2)}
 .hi-date{font-family:var(--mono);font-size:10px;color:var(--ink4);margin-top:2px}
 
+/* ── FILE UPLOAD ── */
+.file-mode-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--line2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);color:var(--ink3);transition:all .12s}
+.file-mode-btn.active{background:var(--blue);color:white;border-color:var(--blue)}
+.file-mode-btn:hover:not(.active){background:var(--bg2);border-color:var(--ink)}
+#file-drop-zone.drag-over{border-color:var(--blue);background:var(--blue-l)}
+
+/* ── MODELS PAGE ── */
+#s-models{background:var(--bg)}
+.models-header{background:var(--white);border-bottom:1px solid var(--line);padding:48px 32px 32px}
+.models-body{max-width:960px;margin:0 auto;padding:32px 32px 80px}
+.models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.model-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:24px;transition:all .15s}
+.model-card:hover{border-color:var(--line2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.mc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.mc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mc-name{font-size:15px;font-weight:700}
+.mc-provider{font-size:11px;color:var(--ink4);font-family:var(--mono)}
+.mc-pci{font-family:var(--serif);font-size:36px;font-style:italic;color:var(--blue)}
+.mc-pci-label{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px}
+.mc-live{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:100px;margin-bottom:10px}
+.mc-live.on{background:var(--green-l);color:var(--green);border:1px solid #BBF7D0}
+.mc-live.off{background:var(--bg2);color:var(--ink4);border:1px solid var(--line)}
+.mc-stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px}
+.mc-stat:last-child{border-bottom:none}
+.mc-stat-k{color:var(--ink3)}
+.mc-stat-v{font-weight:600;font-family:var(--mono)}
+.pb-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);margin:16px 0 10px;font-family:var(--mono)}
+.pb-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+.pb-row:last-child{border-bottom:none}
+.pb-prof{flex:1;color:var(--ink2)}
+.pb-bar-wrap{width:60px;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.pb-fill{height:3px;border-radius:2px}
+.pb-pci{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue);min-width:32px;text-align:right}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .fu{animation:fadeUp .4s ease both}
@@ -611,6 +645,7 @@ select option{background:var(--white)}
   <div class="n-links">
     <button class="n-link" onclick="goTo('home')">Home</button>
     <button class="n-link" onclick="goTo('lb')">Leaderboard</button>
+    <button class="n-link" onclick="goTo('models')">Models</button>
     <button class="n-link" id="test-nav-btn" onclick="goTo('verify')">Run a test</button>
   </div>
   <div class="n-user" id="nav-user">
@@ -834,6 +869,40 @@ select option{background:var(--white)}
         <span class="char-count" id="t-cc">0 / 20</span>
       </div>
     </div>
+
+    <!-- File upload (optional) -->
+    <div class="fu d2" style="margin-bottom:18px">
+      <div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span>Attach a file</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:400;color:var(--ink4);background:var(--bg2);border:1px solid var(--line);padding:2px 7px;border-radius:4px">optional</span>
+      </div>
+      <div id="file-drop-zone" style="border:1.5px dashed var(--line2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white)"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="fileDragOver(event)" ondragleave="fileDragLeave(event)" ondrop="fileDrop(event)">
+        <div style="font-size:24px;margin-bottom:6px">📎</div>
+        <div style="font-size:13px;font-weight:500;color:var(--ink3)">Drop any file here or click to browse</div>
+        <div style="font-size:11px;color:var(--ink4);margin-top:4px;font-family:var(--mono)">PDF, DOCX, TXT, CSV, images, code files · Max 10MB</div>
+        <input type="file" id="file-input" style="display:none" onchange="handleFileSelect(event)"/>
+      </div>
+      <!-- File uploaded state -->
+      <div id="file-uploaded" style="display:none;margin-top:10px">
+        <div style="background:var(--green-l);border:1px solid #BBF7D0;border-radius:var(--r2);padding:12px 16px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:18px">📄</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--ink)" id="file-name"></div>
+            <div style="font-size:11px;color:var(--ink4);font-family:var(--mono)" id="file-info"></div>
+          </div>
+          <button onclick="removeFile()" style="border:none;background:none;cursor:pointer;color:var(--ink4);font-size:16px">✕</button>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:600;color:var(--ink2)">File mode:</span>
+          <button class="file-mode-btn active" id="mode-ctx" onclick="setFileMode('context')">📋 Additional context</button>
+          <button class="file-mode-btn" id="mode-ref" onclick="setFileMode('reference')">📖 Answer based on this</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink4);margin-top:6px" id="file-mode-hint">Models will use this as additional context alongside your task.</div>
+      </div>
+    </div>
+
     <div class="btn-row fu d2">
       <button class="btn btn-primary" onclick="runTaste()">Send to 3 models →</button>
       <button class="btn btn-secondary" onclick="goTo('verify')">← Back</button>
@@ -948,6 +1017,30 @@ select option{background:var(--white)}
 </div>
 
 <!-- ══ PROFILE ═══════════════════════════════════════════════════════════════ -->
+<!-- ══ MODELS PAGE ═══════════════════════════════════════════════════════════ -->
+<div id="s-models" class="screen">
+  <div class="models-header">
+    <div style="max-width:960px;margin:0 auto">
+      <h1 class="lb-h fu">AI Models Compared</h1>
+      <p class="lb-s fu d1">GPT-4o vs Claude Sonnet vs Gemini 2.0 Flash — ranked by verified professional votes across 22 professions. Updated in real time.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" class="fu d2" id="models-filter"></div>
+    </div>
+  </div>
+  <div class="models-body">
+    <div class="models-grid fu d1" id="models-grid">
+      <div class="no-data">Loading...</div>
+    </div>
+    <div class="fu d2">
+      <div class="lb-section-title" style="margin-bottom:16px">Performance by profession</div>
+      <div id="prof-breakdown-table"></div>
+    </div>
+    <div class="btn-row fu d3" style="margin-top:32px">
+      <button class="btn btn-primary" onclick="goTo('verify')">Test these models yourself →</button>
+      <button class="btn btn-secondary" onclick="goTo('lb')">View leaderboard</button>
+    </div>
+  </div>
+</div>
+
 <div id="s-profile" class="screen">
 <div class="profile-wrap">
   <div class="profile-header fu">
@@ -982,7 +1075,7 @@ select option{background:var(--white)}
 </div>
 
 <script>
-const API = "https://aiengine-production-035a.up.railway.app";
+const API = "http://localhost:8000";
 let useMock = true;
 let selProf = "";
 let sessionId = null;
@@ -996,6 +1089,8 @@ let currentUser = null;
 let authToken = null;
 let barChart = null;
 let lineChart = null;
+let uploadedFileId = null;
+let fileMode = "context";
 
 // ── Auth state ─────────────────────────────────────────────────────────────
 function loadAuthState() {
@@ -1130,6 +1225,7 @@ function goTo(id) {
   if (id === 'lb') loadLB();
   if (id === 'profile') loadProfile();
   if (id === 'home') loadStats();
+  if (id === 'models') loadModelsPage();
 }
 
 // ── Utils ──────────────────────────────────────────────────────────────────
@@ -1317,7 +1413,7 @@ async function runTaste() {
   try {
     const res = await fetch(`${API}/taste-test`, {
       method:'POST', headers:authHeaders(),
-      body:JSON.stringify({task, profession:_selProf||'Data Scientist', use_mock:useMock})
+      body:JSON.stringify({task, profession:_selProf||'Data Scientist', use_mock:useMock, file_id:uploadedFileId, file_mode:fileMode})
     });
     if (!res.ok) { const e=await res.json(); throw new Error(e.detail); }
     data = await res.json();
@@ -1333,6 +1429,17 @@ async function runTaste() {
 
   await sleep(300); setLI('ti3','done'); await sleep(200);
   document.getElementById('t-load').style.display='none';
+
+  // Show RAG and file context badges
+  const badges = [];
+  if (data.rag_used) badges.push(`🧠 RAG: ${data.rag_contexts?.map(c=>c.topic).join(', ')}`);
+  if (data.file_used) badges.push(`📎 File: ${data.file_info?.filename} (${data.file_info?.mode})`);
+  if (badges.length) {
+    const badgeEl = document.createElement('div');
+    badgeEl.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px';
+    badgeEl.innerHTML = badges.map(b => `<div style="font-family:var(--mono);font-size:10px;font-weight:500;padding:4px 10px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:6px;color:var(--blue)">${b}</div>`).join('');
+    document.getElementById('t-resp').prepend(badgeEl);
+  }
 
   if (taskType) {
     document.getElementById('tt-badge').style.display='inline-flex';
@@ -1641,6 +1748,153 @@ async function loadProfile() {
     }).join('');
   } catch(e) {
     document.getElementById('p-history').innerHTML = `<div style="padding:16px;color:var(--ink4)">Could not load history.</div>`;
+  }
+}
+
+// ── File upload ───────────────────────────────────────────────────────────
+function fileDragOver(e) {
+  e.preventDefault();
+  document.getElementById('file-drop-zone').classList.add('drag-over');
+}
+function fileDragLeave(e) {
+  document.getElementById('file-drop-zone').classList.remove('drag-over');
+}
+function fileDrop(e) {
+  e.preventDefault();
+  document.getElementById('file-drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) uploadFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) uploadFile(file);
+}
+
+async function uploadFile(file) {
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File too large — maximum 10MB');
+    return;
+  }
+
+  const zone = document.getElementById('file-drop-zone');
+  zone.innerHTML = '<div style="font-size:13px;color:var(--ink4)">Uploading and extracting text...</div>';
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch(`${API}/upload`, {
+      method: 'POST',
+      headers: authToken ? {'Authorization': `Bearer ${authToken}`} : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.detail || 'Upload failed'); resetFileZone(); return; }
+
+    uploadedFileId = data.file_id;
+    document.getElementById('file-name').textContent = data.filename;
+    document.getElementById('file-info').textContent = `${data.chars_extracted.toLocaleString()} characters extracted · ${data.extraction_method}`;
+    document.getElementById('file-drop-zone').style.display = 'none';
+    document.getElementById('file-uploaded').style.display = 'block';
+  } catch(e) {
+    alert('Upload failed — is the backend running?');
+    resetFileZone();
+  }
+}
+
+function resetFileZone() {
+  uploadedFileId = null;
+  document.getElementById('file-drop-zone').style.display = 'block';
+  document.getElementById('file-drop-zone').innerHTML = `
+    <div style="font-size:24px;margin-bottom:6px">📎</div>
+    <div style="font-size:13px;font-weight:500;color:var(--ink3)">Drop any file here or click to browse</div>
+    <div style="font-size:11px;color:var(--ink4);margin-top:4px;font-family:var(--mono)">PDF, DOCX, TXT, CSV, images, code files · Max 10MB</div>
+    <input type="file" id="file-input" style="display:none" onchange="handleFileSelect(event)"/>
+  `;
+  document.getElementById('file-uploaded').style.display = 'none';
+}
+
+function removeFile() {
+  uploadedFileId = null;
+  resetFileZone();
+}
+
+function setFileMode(mode) {
+  fileMode = mode;
+  document.getElementById('mode-ctx').classList.toggle('active', mode === 'context');
+  document.getElementById('mode-ref').classList.toggle('active', mode === 'reference');
+  document.getElementById('file-mode-hint').textContent = mode === 'reference'
+    ? 'Models will answer based primarily on this document.'
+    : 'Models will use this as additional context alongside your task.';
+}
+
+// ── Models page ───────────────────────────────────────────────────────────
+const MODEL_COLORS_MAP = {'Gemini 2.0 Flash':'#1B4FD8','GPT-4o':'#0D9373','Claude Sonnet':'#C2410C'};
+
+async function loadModelsPage() {
+  try {
+    const res = await fetch(`${API}/models-data`);
+    const d = await res.json();
+    renderModelsPage(d);
+  } catch {
+    document.getElementById('models-grid').innerHTML = `<div class="no-data" style="grid-column:1/-1">Backend not reachable</div>`;
+  }
+}
+
+function renderModelsPage(d) {
+  const grid = document.getElementById('models-grid');
+  grid.innerHTML = d.models.map(m => {
+    const color = MODEL_COLORS_MAP[m.display] || '#888';
+    const profEntries = Object.entries(m.by_profession || {}).sort((a,b) => b[1].pci - a[1].pci).slice(0,5);
+    return `
+    <div class="model-card">
+      <div class="mc-header">
+        <div class="mc-dot" style="background:${color}"></div>
+        <div>
+          <div class="mc-name">${m.display}</div>
+          <div class="mc-provider">${m.provider}</div>
+        </div>
+      </div>
+      <div class="mc-live ${m.live?'on':'off'}">${m.live?'● LIVE':'○ MOCK'}</div>
+      <div class="mc-pci">${(m.overall_pci*100).toFixed(1)}</div>
+      <div class="mc-pci-label">PCI Score</div>
+      <div class="mc-stat"><span class="mc-stat-k">Context window</span><span class="mc-stat-v">${(m.context_window/1000).toFixed(0)}K</span></div>
+      <div class="mc-stat"><span class="mc-stat-k">Total votes</span><span class="mc-stat-v">${Object.values(m.by_profession||{}).reduce((a,b)=>a+b.wins,0)}</span></div>
+      ${profEntries.length ? `
+        <div class="pb-title">Top professions</div>
+        ${profEntries.map(([prof, data]) => `
+          <div class="pb-row">
+            <span class="pb-prof">${prof}</span>
+            <div class="pb-bar-wrap"><div class="pb-fill" style="width:${Math.round(data.pci*100)}%;background:${color}"></div></div>
+            <span class="pb-pci">${(data.pci*100).toFixed(0)}</span>
+          </div>
+        `).join('')}
+      ` : '<div style="font-size:12px;color:var(--ink4);margin-top:12px">No votes yet — run a test!</div>'}
+    </div>`;
+  }).join('');
+
+  // Profession breakdown table
+  const allProfs = [...new Set(d.models.flatMap(m => Object.keys(m.by_profession||{})))].sort();
+  if (allProfs.length) {
+    document.getElementById('prof-breakdown-table').innerHTML = `
+      <div style="background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr repeat(${d.models.length},1fr);border-bottom:1px solid var(--line);padding:12px 16px;background:var(--bg)">
+          <div style="font-size:11px;font-weight:700;color:var(--ink4);font-family:var(--mono)">PROFESSION</div>
+          ${d.models.map(m => `<div style="font-size:11px;font-weight:700;color:${MODEL_COLORS_MAP[m.display]||'#888'};font-family:var(--mono);text-align:center">${m.display.split(' ')[0].toUpperCase()}</div>`).join('')}
+        </div>
+        ${allProfs.map(prof => `
+          <div style="display:grid;grid-template-columns:1fr repeat(${d.models.length},1fr);padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px">
+            <div style="color:var(--ink2)">${prof}</div>
+            ${d.models.map(m => {
+              const pd = m.by_profession?.[prof];
+              const color = MODEL_COLORS_MAP[m.display]||'#888';
+              return pd
+                ? `<div style="text-align:center;font-family:var(--mono);font-size:11px;font-weight:600;color:${color}">${(pd.pci*100).toFixed(0)}</div>`
+                : `<div style="text-align:center;color:var(--ink4);font-size:11px">—</div>`;
+            }).join('')}
+          </div>
+        `).join('')}
+      </div>`;
   }
 }
 
