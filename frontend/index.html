@@ -4,6 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Vantage — Professional AI Benchmarking</title>
+<meta name="description" content="Blind-test GPT-4o vs Claude vs Gemini on your real work. Vote for the best. No brand bias."/>
+<meta property="og:title" content="Vantage — Which AI Works For Your Job?"/>
+<meta property="og:description" content="Verified professionals blind-test AI models on real work tasks. The only AI benchmark that can't be gamed."/>
+<meta property="og:image" content="https://your-backend.railway.app/og/default"/>
+<meta property="og:url" content="https://vantage.netlify.app"/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://your-backend.railway.app/og/default"/>
+<meta name="theme-color" content="#F5F3EF"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -488,16 +498,106 @@ select option{background:var(--white)}
 .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}
 .d4{animation-delay:.24s}.d5{animation-delay:.30s}
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE — COMPREHENSIVE MOBILE ── */
 @media(max-width:768px){
-  .home-hero{grid-template-columns:1fr;gap:32px}
+  /* Nav */
+  nav{padding:0 16px;gap:12px}
+  .n-links{gap:0}
+  .n-link{padding:5px 10px;font-size:12px}
+  .n-btn{padding:6px 12px;font-size:12px}
+
+  /* Home hero */
+  .home-hero{grid-template-columns:1fr;gap:24px;padding:40px 20px 32px}
   .hero-right{display:none}
-  .stats-inner{grid-template-columns:repeat(2,1fr)}
-  .lb-layout{grid-template-columns:1fr}
-  .profile-stats{grid-template-columns:repeat(2,1fr)}
+  .hero-h1{font-size:38px}
+  .hero-p{font-size:14px}
+  .hero-actions{flex-direction:column}
+  .hero-actions .btn{width:100%;justify-content:center}
+
+  /* Stats */
+  .stats-strip{padding:16px 20px}
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-n{font-size:32px}
+  .stat-item{padding:12px}
+
+  /* Live counter */
+  .live-counter{padding:0 20px;margin:20px auto}
+
+  /* Wrap */
+  .wrap{padding:32px 16px 60px}
+  .wrap-wide{padding:32px 16px 60px}
+
+  /* Progress */
+  .prog-step{font-size:11px;gap:5px}
+  .prog-num{width:18px;height:18px;font-size:10px}
+
+  /* Page header */
+  .pg-h{font-size:28px}
+
+  /* Profession grid */
+  .prof-grid{grid-template-columns:repeat(2,1fr);gap:5px}
+  .prof-btn{font-size:12px;padding:8px 10px}
+
+  /* Score grid */
   .score-grid{grid-template-columns:1fr 1fr}
-  .prof-grid{grid-template-columns:repeat(2,1fr)}
-  nav{padding:0 16px}
+
+  /* Modal */
+  .modal{padding:24px 20px;border-radius:12px}
+  .modal-title{font-size:22px}
+
+  /* Load steps */
+  .load-steps{padding:16px}
+  .ls-title{font-size:13px}
+
+  /* Response cards */
+  .resp-head{flex-wrap:wrap;gap:6px;padding:10px 14px}
+  .resp-body{padding:14px;font-size:13px}
+  .resp-sel{display:none}
+  .resp-card.selected .resp-sel{display:block}
+
+  /* Reveal */
+  .reveal-hero{padding:40px 20px 32px}
+  .rv-h1{font-size:36px}
+  .share-card{padding:20px}
+  .share-actions{flex-direction:column;align-items:stretch}
+  .share-actions .btn{justify-content:center}
+
+  /* Leaderboard */
+  .lb-header{padding:32px 20px 24px}
+  .lb-body{padding:20px 20px 60px}
+  .lb-layout{grid-template-columns:1fr}
+  .lb-meta{grid-template-columns:repeat(3,1fr);gap:8px}
+  .lb-sv{font-size:24px}
+  .lb-filters{gap:5px}
+  .lb-filter{font-size:11px;padding:4px 10px}
+  .lb-row{padding:12px 14px;gap:10px}
+  .lb-pci{display:none}
+
+  /* Profile */
+  .profile-wrap{padding:32px 16px 60px}
+  .profile-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .profile-header{gap:14px}
+  .profile-avatar{width:52px;height:52px;font-size:20px}
+  .profile-name{font-size:22px}
+  .history-item{flex-direction:column;align-items:flex-start;gap:8px}
+  .hi-winner{margin-left:0}
+
+  /* Dims */
+  .dim-row{flex-wrap:wrap;gap:8px}
+  .dim-name{width:100%;font-size:12px}
+
+  /* Buttons */
+  .btn-row{flex-direction:column}
+  .btn-row .btn{justify-content:center;width:100%}
+}
+
+@media(max-width:480px){
+  .hero-h1{font-size:32px}
+  .pg-h{font-size:24px}
+  .lb-h{font-size:32px}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  .prof-grid{grid-template-columns:1fr 1fr}
+  nav .n-links{display:none}
 }
 </style>
 </head>
@@ -882,7 +982,7 @@ select option{background:var(--white)}
 </div>
 
 <script>
-const API = "http://localhost:8000";
+const API = "https://aiengine-production-035a.up.railway.app";
 let useMock = true;
 let selProf = "";
 let sessionId = null;
@@ -1382,8 +1482,10 @@ async function submitDims() {
 
 function copyShare() {
   if (!voteData) return;
-  navigator.clipboard.writeText(voteData.scorecard.share_text).then(() => {
+  const text = voteData.scorecard.share_text;
+  navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.share-actions .btn-secondary');
+    if (!btn) return;
     const orig = btn.textContent;
     btn.textContent = '✓ Copied!';
     setTimeout(() => btn.textContent = orig, 2000);
@@ -1392,7 +1494,10 @@ function copyShare() {
 
 function shareLinkedIn() {
   if (!voteData) return;
-  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://vantageofai.com&summary=${encodeURIComponent(voteData.scorecard.share_text)}`,'_blank');
+  // Update OG image meta tag for this session
+  const ogImg = document.querySelector('meta[property="og:image"]');
+  if (ogImg) ogImg.content = `${API}/og/${sessionId}`;
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${encodeURIComponent(voteData.scorecard.share_text)}`,'_blank');
 }
 
 function startOver() {

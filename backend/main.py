@@ -811,3 +811,150 @@ def results():
         total = conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
         voted = conn.execute("SELECT COUNT(*) FROM sessions WHERE vote IS NOT NULL").fetchone()[0]
     return {"total_sessions":total,"completed":voted,"sessions":[dict(r) for r in rows]}
+
+@app.get("/og/{session_id}")
+def og_image(session_id: str):
+    """
+    Generate a 1200x630 OG image for a session scorecard.
+    Used for LinkedIn/Twitter link previews.
+    Install: pip install Pillow
+    """
+    from fastapi.responses import Response
+
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM sessions WHERE id=?", (session_id,)).fetchone()
+        if not row or row["vote"] is None:
+            raise HTTPException(404, "Session not found or not yet voted")
+
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        import io
+
+        # Canvas
+        W, H = 1200, 630
+        img = Image.new("RGB", (W, H), "#F5F3EF")
+        draw = ImageDraw.Draw(img)
+
+        # Model colors
+        model_colors = {
+            "Gemini 2.0 Flash": "#1B4FD8",
+            "GPT-4o":           "#0D9373",
+            "Claude Sonnet":    "#C2410C",
+        }
+        winner = row["winner_model"] or "AI Model"
+        accent = model_colors.get(winner, "#1B4FD8")
+
+        # Background accent bar (left side)
+        draw.rectangle([0, 0, 8, H], fill=accent)
+
+        # Top right accent blob
+        draw.ellipse([900, -100, 1350, 350], fill=accent + "18")
+
+        # Try to use a system font, fallback to default
+        try:
+            font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 72)
+            font_med   = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", 36)
+            font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
+            font_mono  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18)
+        except:
+            font_large = ImageFont.load_default()
+            font_med   = font_large
+            font_small = font_large
+            font_mono  = font_large
+
+        # VANTAGE brand top-left
+        draw.text((48, 48), "VANTAGE", font=font_small, fill="#9C9891")
+
+        # Profession tag
+        profession = row["profession"] or "Professional"
+        draw.rectangle([48, 100, 48 + len(profession)*14 + 24, 136], fill=accent + "20", outline=accent + "40")
+        draw.text((60, 108), profession.upper(), font=font_mono, fill=accent)
+
+        # Winner headline
+        draw.text((48, 160), "preferred", font=font_med, fill="#6B6760")
+        draw.text((48, 210), winner, font=font_large, fill=accent)
+
+        # Task preview
+        task_preview = (row["task"] or "")[:80] + ("..." if len(row["task"] or "") > 80 else "")
+        # Word wrap
+        words = task_preview.split()
+        lines, line = [], []
+        for w in words:
+            line.append(w)
+            if len(' '.join(line)) > 52:
+                lines.append(' '.join(line[:-1]))
+                line = [w]
+        if line: lines.append(' '.join(line))
+
+        draw.line([48, 330, 8+48+4, 330], fill="#D9D6CF", width=1)
+        y = 346
+        for l in lines[:3]:
+            draw.text((48, y), l, font=font_small, fill="#6B6760")
+            y += 34
+
+        # PCI score box
+        pci = row["pci_score"]
+        if pci:
+            box_x, box_y = 48, 490
+            draw.rectangle([box_x, box_y, box_x+200, box_y+60], fill=accent+"15", outline=accent+"30")
+            draw.text((box_x+16, box_y+10), "PCI SCORE", font=font_mono, fill=accent)
+            draw.text((box_x+16, box_y+32), f"{pci*100:.1f}", font=font_small, fill=accent)
+
+        # Task type badge
+        task_type = row["task_type"] or ""
+        if task_type:
+            draw.text((280, 506), task_type, font=font_mono, fill="#9C9891")
+
+        # Bottom bar
+        draw.rectangle([0, H-60, W, H], fill="#1A1814")
+        draw.text((48, H-40), "vantageofai.com · Professional AI Benchmarking", font=font_mono, fill="#6B6760")
+        draw.text((W-280, H-40), "No brand bias. Real professional votes.", font=font_mono, fill="#4B4845")
+
+        # Right side — model comparison bars (if we have data)
+        try:
+            lb_data_raw = conn.execute("""SELECT winner_model, COUNT(*) as votes FROM sessions
+                WHERE vote IS NOT NULL AND profession=? GROUP BY winner_model ORDER BY votes DESC""",
+                (profession,)).fetchall() if False else []  # skip for now, use static
+        except: pass
+
+        # Simple right panel
+        draw.rectangle([760, 80, 1160, 530], fill="white", outline="#E8E5DF")
+        draw.text((800, 108), "Voted #1 by professionals", font=font_mono, fill="#9C9891")
+        draw.text((800, 140), winner, font=font_med, fill=accent)
+
+        # Three model indicators
+        models = [("Gemini 2.0 Flash","#1B4FD8"), ("GPT-4o","#0D9373"), ("Claude Sonnet","#C2410C")]
+        for i, (m, c) in enumerate(models):
+            y_pos = 220 + i*80
+            is_winner = m == winner
+            bg = c+"15" if is_winner else "#F5F3EF"
+            border = c if is_winner else "#E8E5DF"
+            draw.rectangle([800, y_pos, 1140, y_pos+60], fill=bg, outline=border)
+            draw.ellipse([816, y_pos+22, 832, y_pos+38], fill=c)
+            draw.text((844, y_pos+18), m, font=font_small, fill="#1A1814" if is_winner else "#9C9891")
+            if is_winner:
+                draw.text((1060, y_pos+20), "WINNER", font=font_mono, fill=c)
+
+        # Export
+        buf = io.BytesIO()
+        img.save(buf, format="PNG", optimize=True)
+        buf.seek(0)
+        return Response(content=buf.read(), media_type="image/png",
+                       headers={"Cache-Control":"public, max-age=3600"})
+
+    except ImportError:
+        # Pillow not installed — return SVG fallback
+        winner = row["winner_model"] or "AI Model"
+        profession = row["profession"] or "Professional"
+        svg = f'''<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+          <rect width="1200" height="630" fill="#F5F3EF"/>
+          <rect width="8" height="630" fill="#1B4FD8"/>
+          <text x="48" y="80" font-family="serif" font-size="20" fill="#9C9891">VANTAGE</text>
+          <text x="48" y="200" font-family="serif" font-size="32" fill="#6B6760">preferred</text>
+          <text x="48" y="280" font-family="serif" font-size="80" font-weight="bold" fill="#1B4FD8">{winner}</text>
+          <text x="48" y="360" font-family="sans-serif" font-size="24" fill="#9C9891">{profession} · Blind AI Test</text>
+          <rect y="570" width="1200" height="60" fill="#1A1814"/>
+          <text x="48" y="607" font-family="monospace" font-size="16" fill="#6B6760">vantageofai.com · Professional AI Benchmarking</text>
+        </svg>'''
+        return Response(content=svg, media_type="image/svg+xml",
+                       headers={"Cache-Control":"public, max-age=3600"})
