@@ -3,368 +3,501 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vantage of AI — Which AI Works For Your Job?</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>Vantage — Professional AI Benchmarking</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#09090B;
-  --s1:#111113;
-  --s2:#18181B;
-  --s3:#27272A;
-  --border:#3F3F46;
-  --border2:#52525B;
-  --text:#FAFAFA;
-  --muted:#A1A1AA;
-  --dim:#71717A;
-  --gemini:#4285F4;
-  --openai:#10A37F;
-  --anthropic:#D97757;
-  --verified:#22C55E;
-  --review:#F59E0B;
-  --flagged:#EF4444;
-  --display:'Playfair Display',serif;
-  --body:'DM Sans',sans-serif;
-  --mono:'DM Mono',monospace;
+  --bg:#F5F3EF;
+  --bg2:#EFEDE8;
+  --bg3:#E8E5DF;
+  --white:#FFFFFF;
+  --ink:#1A1814;
+  --ink2:#3D3A34;
+  --ink3:#6B6760;
+  --ink4:#9C9891;
+  --line:#D9D6CF;
+  --line2:#C5C1B8;
+  --blue:#1B4FD8;
+  --blue-l:#E8EEFB;
+  --blue-m:#B8CAEF;
+  --green:#15803D;
+  --green-l:#DCFCE7;
+  --amber:#B45309;
+  --amber-l:#FEF3C7;
+  --red:#B91C1C;
+  --red-l:#FEE2E2;
+  --gemini:#1B4FD8;
+  --openai:#0D9373;
+  --anthropic:#C2410C;
+  --serif:'Instrument Serif',serif;
+  --sans:'Geist',sans-serif;
+  --mono:'Geist Mono',monospace;
+  --r:10px;
+  --r2:6px;
 }
 
 html{scroll-behavior:smooth}
-body{font-family:var(--body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
-  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(66,133,244,.08),transparent)}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;
+  -webkit-font-smoothing:antialiased;line-height:1.5}
 
 /* ── NAV ── */
 nav{
-  position:fixed;inset:0 0 auto;z-index:300;height:52px;
-  display:flex;align-items:center;padding:0 28px;gap:20px;
-  background:rgba(9,9,11,.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);
+  position:fixed;inset:0 0 auto;z-index:200;height:56px;
+  display:flex;align-items:center;padding:0 32px;gap:24px;
+  background:rgba(245,243,239,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
 }
 .n-logo{
-  font-family:var(--display);font-size:17px;font-weight:900;
-  letter-spacing:-.01em;color:var(--text);cursor:pointer;
-  display:flex;align-items:center;gap:8px;
+  font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink);
+  cursor:pointer;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;
 }
-.n-logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gemini);box-shadow:0 0 8px var(--gemini)}
-.n-steps{display:flex;margin:0 auto}
-.n-step{
-  padding:0 16px;height:52px;display:flex;align-items:center;gap:7px;
-  font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.03em;
-  border-right:1px solid var(--border);cursor:default;transition:color .2s;
+.n-logo-mark{
+  width:24px;height:24px;background:var(--ink);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:13px;color:var(--bg);font-style:normal;
 }
-.n-step:first-child{border-left:1px solid var(--border)}
-.n-step .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0}
-.n-step.active{color:var(--gemini)}.n-step.active .dot{opacity:1}
-.n-step.done{color:var(--verified)}.n-step.done .dot{opacity:1}
-.n-right{display:flex;align-items:center;gap:8px}
-.n-pill{
-  font-size:11px;font-weight:700;font-family:var(--mono);letter-spacing:.05em;
-  padding:5px 12px;border-radius:6px;cursor:pointer;border:1px solid var(--border);
-  color:var(--dim);background:transparent;transition:all .2s;
+.n-links{display:flex;gap:2px;margin-left:auto}
+.n-link{
+  padding:6px 14px;border-radius:var(--r2);font-size:13px;font-weight:500;
+  color:var(--ink3);cursor:pointer;transition:all .15s;border:none;background:none;
+  font-family:var(--sans);
 }
-.n-pill.live{border-color:var(--verified);color:var(--verified)}
-.n-pill.lb{border-color:var(--border2);color:var(--muted)}
-.n-pill.lb:hover{border-color:var(--gemini);color:var(--gemini)}
+.n-link:hover{background:var(--bg2);color:var(--ink)}
+.n-link.active{background:var(--ink);color:var(--white)}
+.n-user{display:flex;align-items:center;gap:10px;margin-left:8px}
+.n-avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:white;cursor:pointer;
+  font-family:var(--sans);border:2px solid var(--white);
+  box-shadow:0 0 0 1px var(--line);
+}
+.n-btn{
+  padding:7px 16px;border-radius:var(--r2);font-size:13px;font-weight:600;
+  cursor:pointer;border:none;font-family:var(--sans);transition:all .15s;
+}
+.n-btn-outline{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.n-btn-outline:hover{background:var(--bg2);border-color:var(--ink)}
+.n-btn-fill{background:var(--ink);color:white}
+.n-btn-fill:hover{opacity:.88}
 
 /* ── SCREEN SYSTEM ── */
-.screen{display:none;min-height:100vh;padding-top:52px;opacity:0;transform:translateY(14px);transition:opacity .4s ease,transform .4s ease}
+.screen{display:none;min-height:100vh;padding-top:56px}
 .screen.active{display:block}
-.screen.in{opacity:1;transform:none}
 
-/* ── HOME ── */
-#s-home{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:100vh;padding:52px 24px 80px;text-align:center;
-  background:radial-gradient(ellipse 70% 60% at 50% 10%,rgba(66,133,244,.1) 0%,transparent 70%);
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;background:rgba(26,24,20,.5);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);
 }
-.h-eyebrow{
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--gemini);margin-bottom:32px;
-  display:inline-flex;align-items:center;gap:8px;
-  padding:6px 16px;border:1px solid rgba(66,133,244,.3);border-radius:100px;
-  background:rgba(66,133,244,.06);
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--white);border-radius:16px;padding:36px;width:420px;max-width:calc(100vw - 32px);
+  box-shadow:0 24px 64px rgba(0,0,0,.15);transform:translateY(12px);transition:transform .2s;
+  position:relative;
 }
-.h-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gemini);animation:blink 2s ease infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.h-title{
-  font-family:var(--display);font-size:clamp(52px,8vw,110px);font-weight:900;
-  line-height:.92;letter-spacing:-.02em;margin-bottom:28px;
+.modal-overlay.open .modal{transform:none}
+.modal-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:6px;
+  background:var(--bg2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--ink3)}
+.modal-close:hover{background:var(--bg3)}
+.modal-title{font-family:var(--serif);font-size:26px;font-style:italic;margin-bottom:4px;color:var(--ink)}
+.modal-sub{font-size:13px;color:var(--ink3);margin-bottom:24px}
+.modal-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:8px;padding:4px;margin-bottom:20px}
+.modal-tab{flex:1;padding:7px;border-radius:6px;font-size:13px;font-weight:500;
+  border:none;background:none;cursor:pointer;font-family:var(--sans);color:var(--ink3);transition:all .15s}
+.modal-tab.active{background:var(--white);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.modal-divider{display:flex;align-items:center;gap:12px;margin:16px 0;
+  font-size:12px;color:var(--ink4);font-family:var(--mono)}
+.modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--line)}
+.google-btn{
+  width:100%;padding:11px;border-radius:var(--r2);border:1px solid var(--line2);
+  background:var(--white);font-size:14px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-family:var(--sans);color:var(--ink);transition:all .15s;margin-bottom:4px;
 }
-.h-title .line2{font-style:italic;color:transparent;
-  background:linear-gradient(135deg,var(--gemini) 0%,#818CF8 50%,var(--anthropic) 100%);
-  -webkit-background-clip:text;background-clip:text;}
-.h-sub{font-size:17px;color:var(--muted);max-width:500px;line-height:1.7;margin-bottom:48px;font-weight:400}
-.h-models{display:flex;gap:12px;margin-bottom:48px;flex-wrap:wrap;justify-content:center}
-.h-model-tag{
-  display:flex;align-items:center;gap:7px;
-  padding:7px 16px;border-radius:8px;border:1px solid var(--border);
-  font-size:13px;font-weight:600;color:var(--muted);background:var(--s1);
-}
-.h-model-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.h-cta{
-  display:inline-flex;align-items:center;gap:10px;
-  background:var(--text);color:var(--bg);font-family:var(--body);
-  font-size:15px;font-weight:700;padding:16px 40px;border-radius:10px;
-  border:none;cursor:pointer;letter-spacing:-.01em;
-  transition:transform .15s,opacity .15s;
-  box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 32px rgba(0,0,0,.4);
-}
-.h-cta:hover{opacity:.88;transform:translateY(-2px)}
-.h-cta .arr{transition:transform .2s}
-.h-cta:hover .arr{transform:translateX(4px)}
-.h-note{margin-top:14px;font-size:12px;color:var(--dim)}
-.h-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:64px;max-width:700px;text-align:left}
-.feat{padding:20px;background:var(--s1);border:1px solid var(--border);border-radius:12px;transition:border-color .2s}
-.feat:hover{border-color:var(--border2)}
-.feat-n{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--gemini);letter-spacing:.1em;margin-bottom:10px}
-.feat-t{font-size:14px;font-weight:700;margin-bottom:6px}
-.feat-d{font-size:12px;color:var(--muted);line-height:1.6}
+.google-btn:hover{background:var(--bg2);border-color:var(--ink)}
+.google-icon{width:18px;height:18px}
 
-/* ── WRAP ── */
-.wrap{max-width:680px;margin:0 auto;padding:48px 24px 80px}
-.pg-h{font-family:var(--display);font-size:clamp(32px,4vw,52px);font-weight:900;letter-spacing:-.02em;margin-bottom:8px;line-height:1.05}
-.pg-s{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:36px;max-width:500px}
-
-/* ── PROGRESS ── */
-.prog-wrap{margin-bottom:32px}
-.prog-bar{height:2px;background:var(--s3);border-radius:2px;overflow:hidden;position:relative}
-.prog-fill{height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gemini),#818CF8);transition:width .6s cubic-bezier(.4,0,.2,1)}
-.prog-labels{display:flex;justify-content:space-between;margin-top:10px}
-.prog-lbl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);transition:color .3s}
-.prog-lbl.a{color:var(--gemini)}.prog-lbl.d{color:var(--verified)}
-
-/* ── FORM ── */
-.field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
-.lbl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
-.lbl-n{text-transform:none;letter-spacing:.03em;color:var(--dim)}
-input,select,textarea{
-  width:100%;padding:13px 16px;font-family:var(--body);font-size:14px;font-weight:500;
-  background:var(--s1);color:var(--text);border:1px solid var(--border);border-radius:10px;
+/* ── FORM ELEMENTS ── */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.lbl{font-size:12px;font-weight:600;color:var(--ink2);letter-spacing:.02em}
+input[type=text],input[type=email],input[type=password],input[type=url],textarea,select{
+  width:100%;padding:10px 13px;border:1px solid var(--line2);border-radius:var(--r2);
+  font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--white);
   outline:none;transition:border-color .15s,box-shadow .15s;
 }
-input:focus,select:focus,textarea:focus{border-color:var(--gemini);box-shadow:0 0 0 3px rgba(66,133,244,.12)}
-input::placeholder,textarea::placeholder{color:var(--dim)}
-select option{background:var(--s2)}
-textarea{resize:vertical;min-height:120px;line-height:1.7}
-.hint{font-size:11px;color:var(--dim);line-height:1.5}
-.cc{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;transition:color .2s}
-.cc.ok{color:var(--verified)}
-
-/* ── PROF GRID ── */
-.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pc{
-  padding:10px 12px;background:var(--s1);border:1px solid var(--border);border-radius:10px;
-  cursor:pointer;font-size:12px;font-weight:600;color:var(--dim);text-align:center;
-  transition:all .15s;
-}
-.pc:hover{border-color:var(--border2);color:var(--muted)}
-.pc.s{border-color:var(--gemini);background:rgba(66,133,244,.1);color:var(--gemini)}
-
-/* ── TOGGLE ── */
-.tog{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-  background:var(--s1);border:1px solid var(--border);border-radius:10px;
-  cursor:pointer;margin-bottom:18px;transition:border-color .2s;
-}
-.tog:hover{border-color:var(--border2)}
-.t-tr{width:36px;height:20px;background:var(--s3);border-radius:10px;position:relative;flex-shrink:0;transition:background .2s}
-.t-tr.on{background:var(--gemini)}
-.t-th{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
-.t-tr.on .t-th{left:19px}
-.t-lb{font-size:13px;font-weight:600}
-.t-nt{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,79,216,.1)}
+input::placeholder,textarea::placeholder{color:var(--ink4)}
+textarea{resize:vertical;min-height:100px;line-height:1.6}
+select option{background:var(--white)}
+.hint{font-size:11px;color:var(--ink4);line-height:1.5}
+.char-count{font-size:11px;color:var(--ink4);font-family:var(--mono);text-align:right}
+.char-count.ok{color:var(--green)}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--body);font-size:13px;font-weight:700;padding:12px 26px;border-radius:10px;border:none;cursor:pointer;transition:transform .12s,opacity .15s;letter-spacing:-.01em}
-.btn:active{transform:scale(.97)}
-.btn-p{background:var(--text);color:var(--bg);box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.btn-p:hover{opacity:.88}
-.btn-p:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
-.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;font-size:12px;border-radius:10px}
-.btn-g:hover{border-color:var(--border2);color:var(--text)}
-.btn-v{background:var(--verified);color:#000}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-family:var(--sans);font-size:14px;font-weight:600;padding:11px 24px;
+  border-radius:var(--r2);border:none;cursor:pointer;transition:all .15s;letter-spacing:-.01em}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--ink);color:white}
+.btn-primary:hover{background:var(--ink2)}
+.btn-primary:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.btn-secondary{background:var(--bg2);color:var(--ink);border:1px solid var(--line2)}
+.btn-secondary:hover{background:var(--bg3);border-color:var(--line)}
+.btn-blue{background:var(--blue);color:white}
+.btn-blue:hover{opacity:.9}
+.btn-sm{padding:7px 16px;font-size:13px}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
 
-/* ── ERROR ── */
-.err{padding:12px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;font-size:13px;color:var(--flagged);margin-bottom:16px;font-weight:500}
+/* ── ERROR / SUCCESS ── */
+.err{padding:10px 14px;background:var(--red-l);border:1px solid #FECACA;border-radius:var(--r2);
+  font-size:13px;color:var(--red);margin-bottom:14px;font-weight:500}
+.success{padding:10px 14px;background:var(--green-l);border:1px solid #BBF7D0;border-radius:var(--r2);
+  font-size:13px;color:var(--green);margin-bottom:14px;font-weight:500}
 
-/* ── LOADING ── */
-.load{padding:28px;background:var(--s1);border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:18px}
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.card-sm{background:var(--white);border:1px solid var(--line);border-radius:var(--r2);padding:16px}
+
+/* ── HOME ── */
+#s-home{background:var(--bg)}
+.home-hero{
+  max-width:1000px;margin:0 auto;padding:80px 32px 64px;
+  display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;
+}
+.hero-left{}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--blue);margin-bottom:20px;
+  padding:4px 12px;background:var(--blue-l);border-radius:100px;border:1px solid var(--blue-m);
+}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--blue);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-h1{font-family:var(--serif);font-size:clamp(44px,5vw,68px);line-height:1.05;
+  letter-spacing:-.02em;color:var(--ink);margin-bottom:20px}
+.hero-h1 em{font-style:italic;color:var(--blue)}
+.hero-p{font-size:16px;color:var(--ink3);line-height:1.7;margin-bottom:32px;max-width:440px}
+.hero-actions{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap}
+.hero-note{font-size:12px;color:var(--ink4)}
+.hero-right{display:flex;flex-direction:column;gap:12px}
+.hero-card{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px;transition:transform .2s,box-shadow .2s;
+}
+.hero-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.08)}
+.hc-step{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:8px}
+.hc-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.hc-desc{font-size:13px;color:var(--ink3);line-height:1.55}
+.hc-models{display:flex;gap:6px;margin-top:10px}
+.hc-model{display:flex;align-items:center;gap:5px;padding:4px 10px;
+  border-radius:100px;border:1px solid var(--line);font-size:11px;font-weight:600;color:var(--ink3)}
+.hc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── STATS STRIP ── */
+.stats-strip{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:var(--white);padding:24px 32px;
+}
+.stats-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-item{padding:16px;text-align:center}
+.stat-n{font-family:var(--serif);font-size:42px;font-style:italic;color:var(--ink);letter-spacing:-.02em}
+.stat-l{font-size:12px;font-weight:500;color:var(--ink4);margin-top:2px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── LIVE COUNTER ── */
+.live-counter{max-width:1000px;margin:32px auto;padding:0 32px}
+.lc-title{font-size:13px;font-weight:600;color:var(--ink3);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.lc-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
+.lc-pills{display:flex;flex-wrap:wrap;gap:8px}
+.lc-pill{padding:5px 12px;background:var(--white);border:1px solid var(--line);border-radius:100px;
+  font-size:12px;font-weight:500;color:var(--ink3);display:flex;align-items:center;gap:6px}
+.lc-count{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue)}
+
+/* ── WRAPPER ── */
+.wrap{max-width:680px;margin:0 auto;padding:48px 24px 80px}
+.wrap-wide{max-width:960px;margin:0 auto;padding:48px 24px 80px}
+
+/* ── PROGRESS ── */
+.progress{margin-bottom:32px}
+.prog-steps{display:flex;gap:0}
+.prog-step{
+  flex:1;display:flex;align-items:center;gap:8px;padding:12px 0;
+  border-bottom:2px solid var(--line);font-size:12px;font-weight:500;color:var(--ink4);
+  transition:all .2s;
+}
+.prog-step.active{border-color:var(--blue);color:var(--blue)}
+.prog-step.done{border-color:var(--green);color:var(--green)}
+.prog-num{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.prog-step.done .prog-num::after{content:'✓'}
+
+/* ── PAGE HEADER ── */
+.pg-h{font-family:var(--serif);font-size:clamp(32px,4vw,48px);font-style:italic;
+  letter-spacing:-.02em;color:var(--ink);margin-bottom:6px;line-height:1.1}
+.pg-s{font-size:14px;color:var(--ink3);margin-bottom:32px;line-height:1.65;max-width:500px}
+
+/* ── PROFESSION GRID ── */
+.prof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:20px}
+.prof-group{margin-bottom:16px}
+.prof-group-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:8px;padding:0 2px}
+.prof-btn{
+  padding:9px 12px;background:var(--white);border:1px solid var(--line);border-radius:var(--r2);
+  font-size:13px;font-weight:500;color:var(--ink3);text-align:left;cursor:pointer;
+  transition:all .15s;font-family:var(--sans);width:100%;
+}
+.prof-btn:hover{border-color:var(--blue-m);color:var(--ink);background:var(--blue-l)}
+.prof-btn.selected{border-color:var(--blue);background:var(--blue-l);color:var(--blue);font-weight:600}
+
+/* ── TOGGLE ── */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:var(--white);border:1px solid var(--line);
+  border-radius:var(--r2);cursor:pointer;margin-bottom:18px;transition:border-color .15s;
+}
+.toggle-row:hover{border-color:var(--line2)}
+.t-left{display:flex;align-items:center;gap:10px}
+.t-switch{width:36px;height:20px;background:var(--line2);border-radius:10px;
+  position:relative;flex-shrink:0;transition:background .2s}
+.t-switch.on{background:var(--blue)}
+.t-thumb{width:14px;height:14px;background:white;border-radius:50%;
+  position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.t-switch.on .t-thumb{left:19px}
+.t-label{font-size:13px;font-weight:600;color:var(--ink)}
+.t-right{font-family:var(--mono);font-size:11px;color:var(--ink4)}
+
+/* ── LOADING STEPS ── */
+.load-steps{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:24px;
+  display:flex;flex-direction:column;gap:16px}
 .ls{display:flex;align-items:center;gap:14px}
-.li{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .3s}
-.li.p{background:var(--s2);color:var(--dim);border:1px solid var(--border)}
-.li.r{background:rgba(66,133,244,.15);color:var(--gemini);border:1px solid var(--gemini);animation:glow 1.4s ease infinite}
-.li.d{background:rgba(34,197,94,.1);color:var(--verified);border:1px solid var(--verified)}
-@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(66,133,244,.4)}60%{box-shadow:0 0 0 8px transparent}}
-.ll{font-size:14px;font-weight:600}
-.ls-{font-size:11px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+.li{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;transition:all .3s;border:1.5px solid var(--line)}
+.li.pending{background:var(--bg2);color:var(--ink4)}
+.li.running{background:var(--blue-l);color:var(--blue);border-color:var(--blue);animation:spin-glow 1.4s ease infinite}
+.li.done{background:var(--green-l);color:var(--green);border-color:var(--green)}
+@keyframes spin-glow{0%,100%{box-shadow:0 0 0 0 rgba(27,79,216,.3)}60%{box-shadow:0 0 0 6px transparent}}
+.ls-title{font-size:14px;font-weight:600;color:var(--ink)}
+.ls-sub{font-size:12px;color:var(--ink4);margin-top:1px;font-family:var(--mono)}
 
-/* ── VERDICT ── */
-.vcard{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-.vh{padding:22px 24px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--border)}
-.vh.verified{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)}
-.vh.review{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2)}
-.vh.flagged{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}
-.vbadge{padding:4px 12px;border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;flex-shrink:0;margin-top:2px}
-.vbadge.verified{background:var(--verified);color:#000}
-.vbadge.review{background:var(--review);color:#000}
-.vbadge.flagged{background:var(--flagged);color:#fff}
-.vt{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-.01em}
-.vr{font-size:13px;color:var(--muted);line-height:1.6}
-.vb{padding:22px 24px;display:flex;flex-direction:column;gap:18px}
-.sc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.sc{padding:14px;background:var(--s2);border-radius:10px;border:1px solid var(--border)}
-.sc-k{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
-.sc-tr{height:2px;background:var(--s3);border-radius:2px;margin-bottom:8px;overflow:hidden}
-.sc-fi{height:2px;border-radius:2px;transition:width 1s ease}
-.sc-vl{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.01em}
-.fl-list{display:flex;flex-direction:column;gap:6px}
-.fl{padding:9px 13px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:12px;color:var(--flagged);font-weight:500}
-
-/* ── LINKEDIN PROFILE CARD ── */
-.prof-card{
-  padding:14px 16px;background:var(--s2);border:1px solid var(--border);border-radius:10px;
-  display:flex;align-items:center;gap:14px;
-}
-.prof-avatar{
-  width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gemini),#818CF8);
-  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;
-  color:#fff;flex-shrink:0;font-family:var(--display);
-}
-.prof-name{font-size:14px;font-weight:700}
-.prof-headline{font-size:12px;color:var(--muted);margin-top:2px}
-.prof-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:5px;background:rgba(66,133,244,.15);color:var(--gemini);font-weight:600}
+/* ── VERIFY RESULT ── */
+.verdict-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.verdict-head{padding:20px 24px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.verdict-head.verified{background:#F0FDF4;border-bottom-color:#BBF7D0}
+.verdict-head.review{background:#FFFBEB;border-bottom-color:#FDE68A}
+.verdict-head.flagged{background:#FFF1F2;border-bottom-color:#FECDD3}
+.v-badge{padding:3px 10px;border-radius:100px;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.08em;flex-shrink:0;margin-top:3px}
+.v-badge.verified{background:var(--green);color:white}
+.v-badge.review{background:var(--amber);color:white}
+.v-badge.flagged{background:var(--red);color:white}
+.v-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.v-reason{font-size:13px;color:var(--ink3);line-height:1.55}
+.verdict-body{padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.score-item{padding:14px;background:var(--bg);border-radius:var(--r2);border:1px solid var(--line)}
+.score-k{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:6px}
+.score-bar{height:3px;background:var(--line);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.score-fill{height:3px;border-radius:2px;transition:width 1s ease}
+.score-v{font-family:var(--serif);font-size:26px;font-style:italic;color:var(--ink);letter-spacing:-.01em}
+.pii-note{display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:var(--green-l);border:1px solid #BBF7D0;border-radius:var(--r2);
+  font-size:13px;color:var(--green);font-weight:500}
 
 /* ── RESPONSE CARDS ── */
-.rgrid{display:flex;flex-direction:column;gap:12px}
-.rc{
-  background:var(--s1);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;
-  cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;
+.response-grid{display:flex;flex-direction:column;gap:10px}
+.resp-card{
+  background:var(--white);border:1.5px solid var(--line);border-radius:var(--r);
+  cursor:pointer;transition:all .15s;overflow:hidden;
 }
-.rc:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
-.rc.sel{border-color:var(--gemini);box-shadow:0 0 0 3px rgba(66,133,244,.15)}
-.rc.won{border-color:var(--verified);box-shadow:0 0 0 3px rgba(34,197,94,.12);cursor:default}
-.rc.lost{opacity:.4;cursor:default}
-.rh{
-  padding:12px 18px;background:var(--s2);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;
-}
-.rl{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.02em}
-.rtype{font-family:var(--mono);font-size:10px;color:var(--dim);background:var(--s3);border:1px solid var(--border);padding:2px 8px;border-radius:5px}
-.rsel{margin-left:auto;font-size:11px;font-weight:700;color:var(--dim);padding:4px 12px;border:1px solid var(--border2);border-radius:6px;background:transparent;transition:all .15s}
-.rc:hover .rsel,.rc.sel .rsel{background:var(--gemini);color:#fff;border-color:var(--gemini)}
-.rbody{padding:18px;font-size:13px;line-height:1.8;color:rgba(250,250,250,.75);white-space:pre-wrap;font-weight:400}
-.wtag{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 10px;border-radius:5px}
-.wtag.y{background:var(--verified);color:#000}
-.wtag.n{background:var(--s3);color:var(--dim)}
-
-/* Model provider label */
-.mprov{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
-.mprov-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.msrc{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--dim)}
+.resp-card:hover{border-color:var(--line2);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.resp-card.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,79,216,.1)}
+.resp-card.won{border-color:var(--green);box-shadow:0 0 0 3px rgba(21,128,61,.08);cursor:default}
+.resp-card.lost{opacity:.45;cursor:default}
+.resp-head{padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+.resp-label{font-family:var(--serif);font-size:14px;font-style:italic;font-weight:400;color:var(--ink)}
+.resp-type{font-family:var(--mono);font-size:10px;color:var(--ink4);
+  background:var(--bg2);border:1px solid var(--line);padding:2px 8px;border-radius:4px}
+.resp-latency{font-family:var(--mono);font-size:10px;color:var(--ink4);margin-left:auto}
+.resp-sel{margin-left:auto;font-size:12px;font-weight:600;color:var(--ink4);
+  padding:4px 12px;border:1px solid var(--line2);border-radius:5px;background:transparent;
+  transition:all .15s}
+.resp-card:hover .resp-sel,.resp-card.selected .resp-sel{background:var(--blue);color:white;border-color:var(--blue)}
+.resp-body{padding:18px;font-size:13px;line-height:1.8;color:var(--ink2);white-space:pre-wrap}
+.model-badge{display:flex;align-items:center;gap:6px;margin-left:auto}
+.model-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.model-name{font-size:13px;font-weight:600;color:var(--ink)}
+.model-prov{font-size:11px;color:var(--ink4)}
+.model-src{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;
+  background:var(--bg2);color:var(--ink4);border:1px solid var(--line)}
+.won-tag{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;
+  padding:3px 10px;border-radius:4px}
+.won-tag.y{background:var(--green-l);color:var(--green);border:1px solid #BBF7D0}
+.won-tag.n{background:var(--bg2);color:var(--ink4);border:1px solid var(--line)}
 
 /* ── TASK TYPE BADGE ── */
-.ttbadge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
-  background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.2);border-radius:8px;
-  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gemini);margin-bottom:16px}
+.task-badge{display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;
+  padding:5px 12px;background:var(--blue-l);border:1px solid var(--blue-m);
+  border-radius:6px;color:var(--blue);margin-bottom:14px}
 
 /* ── DIMENSION RATING ── */
-.dims{padding:22px 24px;background:var(--s1);border:1px solid var(--border);border-radius:16px;margin-top:16px}
-.dim-t{font-size:14px;font-weight:700;margin-bottom:4px}
-.dim-s{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
-.dim-rows{display:flex;flex-direction:column;gap:14px}
-.dim-row{display:flex;align-items:center;gap:16px}
-.dim-name{font-size:13px;font-weight:600;width:190px;flex-shrink:0}
-.stars{display:flex;gap:5px}
-.star{width:28px;height:28px;border-radius:7px;background:var(--s2);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s}
-.star.on{background:rgba(245,158,11,.15);border-color:var(--review);color:var(--review)}
+.dims-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:24px;margin-top:16px}
+.dims-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.dims-sub{font-size:13px;color:var(--ink3);margin-bottom:20px;line-height:1.55}
+.dim-row{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.dim-name{font-size:13px;font-weight:500;width:180px;flex-shrink:0;color:var(--ink2)}
+.stars{display:flex;gap:4px}
+.star{width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .12s}
+.star:hover{background:var(--amber-l);border-color:#FCD34D}
+.star.on{background:var(--amber-l);border-color:#FCD34D;color:var(--amber)}
 
 /* ── REVEAL ── */
 #s-reveal{background:var(--bg)}
-.rv-hero{
-  text-align:center;padding:70px 24px 48px;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(66,133,244,.12) 0%,transparent 70%);
-  border-bottom:1px solid var(--border);
-  position:relative;overflow:hidden;
+.reveal-hero{
+  border-bottom:1px solid var(--line);background:var(--white);padding:64px 32px 48px;
+  text-align:center;
 }
-.rv-hero::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 20% 60%,rgba(217,119,87,.05) 0%,transparent 50%),
-             radial-gradient(circle at 80% 60%,rgba(16,163,127,.05) 0%,transparent 50%);
-}
-.rv-tag{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-.rv-h1{font-family:var(--display);font-size:clamp(32px,5vw,70px);font-weight:900;letter-spacing:-.02em;line-height:1;margin-bottom:14px;position:relative;z-index:1}
-.rv-sub{font-size:14px;color:var(--muted);margin-bottom:10px;font-weight:500;position:relative;z-index:1}
-.rv-peer{display:inline-block;margin:0 auto 36px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--verified);padding:5px 16px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:100px;position:relative;z-index:1}
+.rv-tag{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:16px}
+.rv-h1{font-family:var(--serif);font-size:clamp(40px,6vw,72px);font-style:italic;
+  letter-spacing:-.02em;color:var(--ink);margin-bottom:10px;line-height:1}
+.rv-winner{color:var(--blue)}
+.rv-sub{font-size:15px;color:var(--ink3);margin-bottom:8px}
+.rv-peer{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;
+  color:var(--green);padding:4px 14px;background:var(--green-l);border:1px solid #BBF7D0;
+  border-radius:100px;margin-bottom:32px}
 
 /* ── SHARE CARD ── */
 .share-card{
-  max-width:400px;margin:0 auto 32px;
-  background:linear-gradient(135deg,#101018 0%,#0C0C18 100%);
-  border-radius:20px;padding:28px;position:relative;overflow:hidden;
-  box-shadow:0 32px 64px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06);
+  max-width:380px;margin:0 auto 28px;
+  background:var(--ink);border-radius:16px;padding:28px;
+  box-shadow:0 24px 64px rgba(0,0,0,.2);
 }
-.share-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(66,133,244,.2),transparent 70%)}
-.share-card::after{content:'';position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(16,163,127,.12),transparent 70%)}
-.sc-prof{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gemini);margin-bottom:4px;position:relative;z-index:1}
-.sc-title{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:-.01em;margin-bottom:20px;position:relative;z-index:1}
-.sc-winner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;margin-bottom:14px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.06)}
+.sc-eyebrow{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px}
+.sc-title{font-family:var(--serif);font-size:22px;font-style:italic;color:white;margin-bottom:20px;letter-spacing:-.01em}
+.sc-winner-row{display:flex;align-items:center;gap:12px;padding:14px;
+  background:rgba(255,255,255,.08);border-radius:10px;margin-bottom:12px;
+  border:1px solid rgba(255,255,255,.08)}
 .sc-trophy{font-size:20px}
-.sc-wl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
-.sc-wn{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.01em}
-.sc-task{font-size:11px;color:var(--dim);line-height:1.6;font-style:italic;border-left:2px solid var(--s3);padding-left:12px;margin-bottom:16px;position:relative;z-index:1}
-.sc-tt{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--gemini);letter-spacing:.08em;margin-bottom:4px;position:relative;z-index:1}
-.sc-foot{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
-.sc-brand{font-family:var(--display);font-size:13px;font-weight:700;color:var(--muted)}
-.sc-date{font-family:var(--mono);font-size:10px;color:var(--dim)}
-.share-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.sc-wl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2px}
+.sc-wn{font-family:var(--serif);font-size:18px;font-style:italic;color:white}
+.sc-task{font-size:12px;color:rgba(255,255,255,.4);line-height:1.6;
+  border-left:2px solid rgba(255,255,255,.1);padding-left:12px;margin-bottom:16px;font-style:italic}
+.sc-foot{display:flex;align-items:center;justify-content:space-between}
+.sc-brand{font-family:var(--serif);font-size:13px;font-style:italic;color:rgba(255,255,255,.5)}
+.sc-date{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3)}
+.share-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
 
 /* ── LEADERBOARD ── */
 #s-lb{background:var(--bg)}
-.lb-wrap{max-width:760px;margin:0 auto;padding:48px 24px 80px}
-.lb-h{font-family:var(--display);font-size:clamp(36px,5vw,64px);font-weight:900;letter-spacing:-.02em;margin-bottom:8px}
-.lb-s{font-size:14px;color:var(--muted);margin-bottom:32px}
-.lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
-.lb-stat{padding:16px;background:var(--s1);border:1px solid var(--border);border-radius:12px}
-.lb-sv{font-family:var(--display);font-size:36px;font-weight:700;color:var(--gemini);letter-spacing:-.02em}
-.lb-sl{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
-.lb-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.lb-f{padding:6px 14px;border:1px solid var(--border);border-radius:7px;font-size:12px;font-weight:600;color:var(--dim);background:transparent;cursor:pointer;font-family:var(--body);transition:all .15s}
-.lb-f:hover{border-color:var(--border2);color:var(--muted)}
-.lb-f.a{border-color:var(--gemini);color:var(--gemini);background:rgba(66,133,244,.08)}
-.lb-table{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px}
-.lb-row{display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);transition:background .15s}
+.lb-header{background:var(--white);border-bottom:1px solid var(--line);padding:48px 32px 32px}
+.lb-inner{max-width:960px;margin:0 auto}
+.lb-h{font-family:var(--serif);font-size:clamp(36px,5vw,60px);font-style:italic;letter-spacing:-.02em;margin-bottom:6px}
+.lb-s{font-size:14px;color:var(--ink3);margin-bottom:24px}
+.lb-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:480px}
+.lb-stat{padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r2)}
+.lb-sv{font-family:var(--serif);font-size:32px;font-style:italic;color:var(--blue);letter-spacing:-.02em}
+.lb-sl{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink4);margin-top:2px}
+.lb-body{max-width:960px;margin:0 auto;padding:32px 32px 80px}
+.lb-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.lb-section-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink4);margin-bottom:14px;font-family:var(--mono)}
+
+/* Table */
+.lb-table{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.lb-row{display:flex;align-items:center;gap:14px;padding:14px 18px;
+  border-bottom:1px solid var(--line);transition:background .12s}
 .lb-row:last-child{border-bottom:none}
-.lb-row:hover{background:var(--s2)}
-.lb-rank{font-family:var(--display);font-size:22px;font-weight:700;color:var(--dim);width:28px;text-align:center;flex-shrink:0}
-.lb-rank.g{color:var(--review)}
+.lb-row:hover{background:var(--bg)}
+.lb-rank{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--ink4);
+  width:24px;text-align:center;flex-shrink:0}
+.lb-rank.top{color:var(--blue)}
 .lb-mi{flex:1}
-.lb-mprov{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.lb-mrow{display:flex;align-items:center;gap:7px;margin-bottom:2px}
+.lb-mdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .lb-mname{font-size:14px;font-weight:700}
-.lb-msub{font-size:11px;color:var(--dim);font-family:var(--mono)}
-.lb-bar{flex:1;max-width:100px}
-.lb-bt{height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
-.lb-bf{height:3px;border-radius:2px;transition:width .8s ease}
-.lb-votes{text-align:right;min-width:48px}
-.lb-vn{font-family:var(--display);font-size:24px;font-weight:700}
-.lb-vl{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
-.no-data{padding:48px;text-align:center;color:var(--dim);font-size:14px}
+.lb-mprov{font-size:11px;color:var(--ink4);font-family:var(--mono)}
+.lb-bar-wrap{flex:1;max-width:80px}
+.lb-bar-bg{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.lb-bar-fill{height:3px;border-radius:2px;transition:width .8s ease}
+.lb-votes{text-align:right;min-width:44px}
+.lb-vn{font-family:var(--serif);font-size:22px;font-style:italic;color:var(--ink)}
+.lb-vl{font-family:var(--mono);font-size:9px;color:var(--ink4);letter-spacing:.08em;text-transform:uppercase}
+.lb-pci{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--blue);
+  padding:2px 8px;background:var(--blue-l);border-radius:4px;margin-left:auto}
+
+/* Charts */
+.chart-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.chart-wrap{height:200px;position:relative}
+
+/* Filters */
+.lb-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.lb-filter{padding:5px 14px;border:1px solid var(--line);border-radius:100px;
+  font-size:12px;font-weight:500;color:var(--ink3);background:transparent;cursor:pointer;
+  font-family:var(--sans);transition:all .12s}
+.lb-filter:hover{border-color:var(--ink);color:var(--ink)}
+.lb-filter.active{background:var(--ink);color:white;border-color:var(--ink)}
+
+.no-data{padding:48px;text-align:center;color:var(--ink4);font-size:14px}
+
+/* ── PROFILE PAGE ── */
+#s-profile{background:var(--bg)}
+.profile-wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.profile-header{display:flex;align-items:center;gap:20px;margin-bottom:32px}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;
+  color:white;font-family:var(--serif);font-style:italic;flex-shrink:0;
+  box-shadow:0 0 0 3px white,0 0 0 4px var(--line)}
+.profile-name{font-family:var(--serif);font-size:28px;font-style:italic;letter-spacing:-.01em}
+.profile-email{font-size:13px;color:var(--ink4);font-family:var(--mono)}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.ps-item{padding:16px;background:var(--white);border:1px solid var(--line);border-radius:var(--r2)}
+.ps-v{font-family:var(--serif);font-size:32px;font-style:italic;color:var(--blue)}
+.ps-l{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-top:2px}
+.trust-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+.trust-fill{height:6px;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:3px;transition:width .8s ease}
+.history-item{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--r2);
+  padding:14px 18px;display:flex;align-items:center;gap:14px;margin-bottom:8px;
+  transition:border-color .12s;
+}
+.history-item:hover{border-color:var(--line2)}
+.hi-prof{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink4)}
+.hi-task{font-size:13px;font-weight:500;color:var(--ink);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+.hi-winner{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.hi-wd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.hi-wn{font-size:12px;font-weight:600;color:var(--ink2)}
+.hi-date{font-family:var(--mono);font-size:10px;color:var(--ink4);margin-top:2px}
 
 /* ── ANIMATIONS ── */
-@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-.fu{animation:fu .45s ease both}
-.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.40s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.fu{animation:fadeUp .4s ease both}
+.d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}
+.d4{animation-delay:.24s}.d5{animation-delay:.30s}
 
 /* ── RESPONSIVE ── */
-@media(max-width:600px){
-  nav{padding:0 14px}
-  .h-features{grid-template-columns:1fr}
-  .pgrid{grid-template-columns:repeat(2,1fr)}
-  .sc-row{grid-template-columns:1fr}
-  .lb-stats{grid-template-columns:1fr 1fr}
-  .share-actions{flex-direction:column;align-items:center}
-  .dim-row{flex-wrap:wrap}
-  .dim-name{width:100%}
+@media(max-width:768px){
+  .home-hero{grid-template-columns:1fr;gap:32px}
+  .hero-right{display:none}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .lb-layout{grid-template-columns:1fr}
+  .profile-stats{grid-template-columns:repeat(2,1fr)}
+  .score-grid{grid-template-columns:1fr 1fr}
+  .prof-grid{grid-template-columns:repeat(2,1fr)}
+  nav{padding:0 16px}
 }
 </style>
 </head>
@@ -372,237 +505,384 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 
 <nav>
   <div class="n-logo" onclick="goTo('home')">
-    <div class="n-logo-dot"></div>
-    VANTAGE
+    <div class="n-logo-mark">V</div>
+    Vantage
   </div>
-  <div class="n-steps">
-    <div class="n-step active" id="nb-v"><span class="dot"></span>Verify</div>
-    <div class="n-step" id="nb-t"><span class="dot"></span>Test</div>
-    <div class="n-step" id="nb-vo"><span class="dot"></span>Vote</div>
-    <div class="n-step" id="nb-r"><span class="dot"></span>Reveal</div>
+  <div class="n-links">
+    <button class="n-link" onclick="goTo('home')">Home</button>
+    <button class="n-link" onclick="goTo('lb')">Leaderboard</button>
+    <button class="n-link" id="test-nav-btn" onclick="goTo('verify')">Run a test</button>
   </div>
-  <div class="n-right">
-    <div class="n-pill lb" onclick="goLB()">Leaderboard ↗</div>
-    <div class="n-pill" id="mode-pill" onclick="toggleMode()">MOCK</div>
+  <div class="n-user" id="nav-user">
+    <button class="n-btn n-btn-outline btn-sm" onclick="openModal('login')">Sign in</button>
+    <button class="n-btn n-btn-fill btn-sm" onclick="openModal('register')">Sign up</button>
+  </div>
+  <div class="n-user" id="nav-authed" style="display:none">
+    <div class="n-avatar" id="nav-avatar" onclick="goTo('profile')"></div>
   </div>
 </nav>
 
-<!-- ══ HOME ═══════════════════════════════════════════════════════════ -->
-<div id="s-home" class="screen active">
-  <div class="h-eyebrow fu">Professional AI Benchmarking</div>
-  <h1 class="h-title fu d1">WHICH AI<br/><span class="line2">WORKS FOR</span><br/>YOUR JOB?</h1>
-  <p class="h-sub fu d2">Submit a real task from your work. Three AI models respond anonymously. Vote for the best. Find out who won — and help build the professional AI index.</p>
-  <div class="h-models fu d2" id="h-models">
-    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--gemini)"></div>Gemini 2.0 Flash</div>
-    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--openai)"></div>GPT-4o</div>
-    <div class="h-model-tag"><div class="h-model-dot" style="background:var(--anthropic)"></div>Claude Sonnet</div>
-  </div>
-  <button class="h-cta fu d3" onclick="goTo('verify')">Start the test <span class="arr">→</span></button>
-  <p class="h-note fu d3">3 minutes · No account · Votes feed the live leaderboard</p>
-  <div class="live-counter fu d4" id="live-counter" style="display:none;margin-top:28px;max-width:600px">
-    <div style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;text-align:center">Live votes by profession</div>
-    <div id="lc-pills" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
-  </div>
-  <div class="h-features fu d4">
-    <div class="feat"><div class="feat-n">01 · VERIFY</div><div class="feat-t">Prove you're a professional</div><div class="feat-d">LinkedIn URL + real task. AI checks if your background matches. No OAuth, no stored data.</div></div>
-    <div class="feat"><div class="feat-n">02 · BLIND TEST</div><div class="feat-t">Three models, zero brand bias</div><div class="feat-d">GPT-4o vs Claude vs Gemini — anonymised as A, B, C. Your vote is honest.</div></div>
-    <div class="feat"><div class="feat-n">03 · REVEAL</div><div class="feat-t">Find out who actually won</div><div class="feat-d">Model names revealed. Rate the winner on profession-specific dimensions. Share your result.</div></div>
+<!-- ══ AUTH MODAL ════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="auth-modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Welcome to Vantage</div>
+    <div class="modal-sub">Professional AI benchmarking, by professionals.</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Sign in</button>
+      <button class="modal-tab" id="tab-register" onclick="switchTab('register')">Create account</button>
+    </div>
+    <div id="auth-err" class="err" style="display:none"></div>
+
+    <!-- Google -->
+    <button class="google-btn" onclick="googleSignIn()">
+      <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div class="modal-divider">or</div>
+
+    <!-- Login form -->
+    <div id="login-form">
+      <div class="field">
+        <label class="lbl">Email</label>
+        <input type="email" id="login-email" placeholder="you@company.com"/>
+      </div>
+      <div class="field">
+        <label class="lbl">Password</label>
+        <input type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitLogin()"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="submitLogin()">Sign in →</button>
+    </div>
+
+    <!-- Register form -->
+    <div id="register-form" style="display:none">
+      <div class="field">
+        <label class="lbl">Full name</label>
+        <input type="text" id="reg-name" placeholder="Alex Chen"/>
+      </div>
+      <div class="field">
+        <label class="lbl">Email</label>
+        <input type="email" id="reg-email" placeholder="you@company.com"/>
+      </div>
+      <div class="field">
+        <label class="lbl">Password</label>
+        <input type="password" id="reg-pw" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter')submitRegister()"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="submitRegister()">Create account →</button>
+    </div>
   </div>
 </div>
 
-<!-- ══ VERIFY ═════════════════════════════════════════════════════════ -->
+<!-- ══ HOME ══════════════════════════════════════════════════════════════ -->
+<div id="s-home" class="screen active">
+  <div class="home-hero">
+    <div class="hero-left">
+      <div class="hero-tag fu"><div class="hero-tag-dot"></div>Professional AI Benchmarking</div>
+      <h1 class="hero-h1 fu d1">Which AI actually works<br/><em>for your job?</em></h1>
+      <p class="hero-p fu d2">Submit a real task from your work. Three AI models respond anonymously. Vote for the best. Find out who won — and help build the only AI index that matters: verified professional judgment.</p>
+      <div class="hero-actions fu d3">
+        <button class="btn btn-primary" onclick="goTo('verify')">Start the test →</button>
+        <button class="btn btn-secondary" onclick="goTo('lb')">View leaderboard</button>
+      </div>
+      <div class="hero-note fu d4">3 minutes · No brand bias · Votes feed the public leaderboard</div>
+    </div>
+    <div class="hero-right fu d2">
+      <div class="hero-card">
+        <div class="hc-step">01 · Verify</div>
+        <div class="hc-title">Prove you're a professional</div>
+        <div class="hc-desc">LinkedIn URL + real task. AI checks if your background matches your profession. No OAuth, no stored data.</div>
+      </div>
+      <div class="hero-card">
+        <div class="hc-step">02 · Blind test</div>
+        <div class="hc-title">Three models, zero brand bias</div>
+        <div class="hc-desc">GPT-4o vs Claude vs Gemini — anonymised as A, B, C. Your vote is honest.</div>
+        <div class="hc-models">
+          <div class="hc-model"><div class="hc-dot" style="background:#1B4FD8"></div>Gemini</div>
+          <div class="hc-model"><div class="hc-dot" style="background:#0D9373"></div>GPT-4o</div>
+          <div class="hc-model"><div class="hc-dot" style="background:#C2410C"></div>Claude</div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hc-step">03 · Reveal</div>
+        <div class="hc-title">Find out who actually won</div>
+        <div class="hc-desc">Model names revealed. Rate on profession-specific dimensions. Your vote contributes to the PCI — the only benchmark that can't be gamed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <div class="stat-n" id="h-votes">—</div>
+        <div class="stat-l">Total votes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n" id="h-sessions">—</div>
+        <div class="stat-l">Sessions run</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n" id="h-users">—</div>
+        <div class="stat-l">Professionals</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n" id="h-profs">—</div>
+        <div class="stat-l">Verticals covered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-counter" id="live-counter" style="display:none">
+    <div class="lc-title"><div class="lc-dot"></div>Live votes by profession</div>
+    <div class="lc-pills" id="lc-pills"></div>
+  </div>
+</div>
+
+<!-- ══ VERIFY ══════════════════════════════════════════════════════════════ -->
 <div id="s-verify" class="screen">
 <div class="wrap">
-  <div class="prog-wrap fu">
-    <div class="prog-bar"><div class="prog-fill" style="width:25%"></div></div>
-    <div class="prog-labels">
-      <span class="prog-lbl a">Verify</span>
-      <span class="prog-lbl" id="pl-t">Test</span>
-      <span class="prog-lbl" id="pl-v">Vote</span>
-      <span class="prog-lbl" id="pl-r">Reveal</span>
+  <div class="progress fu">
+    <div class="prog-steps">
+      <div class="prog-step active" id="ps-1"><div class="prog-num">1</div>Verify</div>
+      <div class="prog-step" id="ps-2"><div class="prog-num">2</div>Test</div>
+      <div class="prog-step" id="ps-3"><div class="prog-num">3</div>Vote</div>
+      <div class="prog-step" id="ps-4"><div class="prog-num">4</div>Reveal</div>
     </div>
   </div>
   <h1 class="pg-h fu">Verify your identity</h1>
-  <p class="pg-s fu d1">Before your vote counts on the leaderboard, confirm you're a professional in the field you're evaluating.</p>
+  <p class="pg-s fu d1">Confirm you're a professional in the field you're evaluating. Your vote carries more weight with verification.</p>
   <div class="err" id="v-err" style="display:none"></div>
   <div id="v-form">
     <div class="field fu d1">
       <label class="lbl">Your profession</label>
-      <div class="pgrid" id="pgrid"></div>
+      <div id="prof-grid-container"></div>
     </div>
     <div class="field fu d2">
-      <label class="lbl">LinkedIn profile URL <span class="lbl-n">· public profile · no login</span></label>
+      <label class="lbl">LinkedIn profile URL</label>
       <input type="url" id="v-url" placeholder="https://www.linkedin.com/in/yourname"/>
-      <span class="hint">We scrape the public page — no OAuth, no login, no stored data.</span>
+      <span class="hint">Public profile only — no OAuth, no login, no stored data.</span>
     </div>
-    <div class="field fu d3">
-      <label class="lbl">A real task from your work <span class="lbl-n">· this week · remove identifying info</span></label>
-      <textarea id="v-task" placeholder="Paste a real task — the more domain-specific, the better your verification result." oninput="charCount('v-task','v-cc')"></textarea>
+    <div class="field fu d2">
+      <label class="lbl">A real task from your work this week</label>
+      <textarea id="v-task" placeholder="Paste a specific professional task. The more domain-specific, the more interesting the model comparison." oninput="cc('v-task','v-cc')"></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="hint">AI checks if your task matches your profession.</span>
-        <span class="cc" id="v-cc">0 / 20</span>
+        <span class="hint">Remove names and identifying info first.</span>
+        <span class="char-count" id="v-cc">0 / 20</span>
       </div>
     </div>
-    <div class="tog fu d3" onclick="toggleMode()">
-      <div class="t-tr on" id="t-tr"><div class="t-th"></div></div>
-      <span class="t-lb">Mock mode</span>
-      <span class="t-nt" id="t-nt">No API key needed</span>
+    <div class="toggle-row fu d3" onclick="toggleMode()">
+      <div class="t-left">
+        <div class="t-switch on" id="t-sw"><div class="t-thumb"></div></div>
+        <span class="t-label">Mock mode</span>
+      </div>
+      <span class="t-right" id="t-note">No API key needed</span>
     </div>
-    <div class="btn-row fu d4">
-      <button class="btn btn-p" onclick="runVerify()">Verify identity →</button>
-      <button class="btn btn-g" onclick="goTo('home')">← Back</button>
+    <div class="btn-row fu d3">
+      <button class="btn btn-primary" onclick="runVerify()">Verify identity →</button>
+      <button class="btn btn-secondary" onclick="goTo('home')">← Back</button>
     </div>
   </div>
-  <div class="load" id="v-load" style="display:none">
-    <div class="ls"><div class="li p" id="vi1">1</div><div><div class="ll">Scraping LinkedIn profile</div><div class="ls-">Reading public page — no login required</div></div></div>
-    <div class="ls"><div class="li p" id="vi2">2</div><div><div class="ll">AI plausibility check</div><div class="ls-">Profile + task consistency analysis</div></div></div>
-    <div class="ls"><div class="li p" id="vi3">3</div><div><div class="ll">Assigning trust score</div><div class="ls-">Vote weight calculation</div></div></div>
+  <div class="load-steps" id="v-load" style="display:none">
+    <div class="ls"><div class="li pending" id="vi1">1</div><div><div class="ls-title">Checking LinkedIn profile</div><div class="ls-sub">Reading public page — no login required</div></div></div>
+    <div class="ls"><div class="li pending" id="vi2">2</div><div><div class="ls-title">AI plausibility check</div><div class="ls-sub">Profile + task consistency analysis</div></div></div>
+    <div class="ls"><div class="li pending" id="vi3">3</div><div><div class="ls-title">Assigning trust score</div><div class="ls-sub">Vote weight calculation</div></div></div>
   </div>
-  <div class="vcard" id="v-result" style="display:none">
-    <div class="vh" id="vr-head">
-      <div style="flex:1"><div class="vt" id="vr-t"></div><div class="vr" id="vr-r"></div></div>
-      <div class="vbadge" id="vr-b"></div>
+  <div class="verdict-card" id="v-result" style="display:none">
+    <div class="verdict-head" id="vr-head">
+      <div style="flex:1"><div class="v-title" id="vr-t"></div><div class="v-reason" id="vr-r"></div></div>
+      <div class="v-badge" id="vr-b"></div>
     </div>
-    <div class="vb">
-      <div id="v-prof-wrap" style="display:none">
-        <div class="lbl" style="margin-bottom:8px">LinkedIn profile extracted</div>
-        <div class="prof-card" id="v-prof-card"></div>
+    <div class="verdict-body">
+      <div id="pii-note" style="display:none" class="pii-note">🔒 PII automatically masked before sending to AI models</div>
+      <div class="score-grid">
+        <div class="score-item"><div class="score-k">Confidence</div><div class="score-bar"><div class="score-fill" id="sf-c" style="background:var(--blue)"></div></div><div class="score-v" id="sv-c"></div></div>
+        <div class="score-item"><div class="score-k">Trust score</div><div class="score-bar"><div class="score-fill" id="sf-t" style="background:var(--green)"></div></div><div class="score-v" id="sv-t"></div></div>
+        <div class="score-item"><div class="score-k">Vote weight</div><div class="score-bar"><div class="score-fill" id="sf-v" style="background:var(--amber)"></div></div><div class="score-v" id="sv-v"></div></div>
       </div>
-      <div>
-        <div class="lbl" style="margin-bottom:10px">Scores</div>
-        <div class="sc-row">
-          <div class="sc"><div class="sc-k">Confidence</div><div class="sc-tr"><div class="sc-fi" id="sf-c" style="background:var(--gemini)"></div></div><div class="sc-vl" id="sv-c"></div></div>
-          <div class="sc"><div class="sc-k">Trust score</div><div class="sc-tr"><div class="sc-fi" id="sf-t" style="background:var(--verified)"></div></div><div class="sc-vl" id="sv-t"></div></div>
-          <div class="sc"><div class="sc-k">Vote weight</div><div class="sc-tr"><div class="sc-fi" id="sf-v" style="background:var(--review)"></div></div><div class="sc-vl" id="sv-v"></div></div>
-        </div>
+      <div id="fl-wrap" style="display:none">
+        <div class="lbl" style="margin-bottom:8px">Flags</div>
+        <div id="fl-list"></div>
       </div>
-      <div id="fl-wrap" style="display:none"><div class="lbl" style="margin-bottom:8px">Flags</div><div class="fl-list" id="fl-list"></div></div>
       <div class="btn-row">
-        <button class="btn btn-p" id="v-proceed" onclick="goTo('taste')">Continue to blind test →</button>
-        <button class="btn btn-g" onclick="resetVerify()">Try again</button>
+        <button class="btn btn-primary" id="v-proceed" onclick="goTo('taste')">Continue to blind test →</button>
+        <button class="btn btn-secondary" onclick="resetVerify()">Try again</button>
       </div>
     </div>
   </div>
 </div>
 </div>
 
-<!-- ══ TASTE TEST ══════════════════════════════════════════════════════ -->
+<!-- ══ TASTE TEST ═══════════════════════════════════════════════════════════ -->
 <div id="s-taste" class="screen">
 <div class="wrap">
-  <div class="prog-wrap fu">
-    <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
-    <div class="prog-labels">
-      <span class="prog-lbl d">Verify</span>
-      <span class="prog-lbl a">Test</span>
-      <span class="prog-lbl">Vote</span>
-      <span class="prog-lbl">Reveal</span>
+  <div class="progress fu">
+    <div class="prog-steps">
+      <div class="prog-step done" id="ps-1b"><div class="prog-num"></div>Verify</div>
+      <div class="prog-step active"><div class="prog-num">2</div>Test</div>
+      <div class="prog-step"><div class="prog-num">3</div>Vote</div>
+      <div class="prog-step"><div class="prog-num">4</div>Reveal</div>
     </div>
   </div>
   <h1 class="pg-h fu">Blind taste test</h1>
-  <p class="pg-s fu d1">GPT-4o, Claude Sonnet, and Gemini respond to your task — as Model A, B, C. No names until after you vote.</p>
+  <p class="pg-s fu d1">GPT-4o, Claude Sonnet, and Gemini 2.0 Flash respond to your task as Model A, B, C. No names until after you vote.</p>
   <div class="err" id="t-err" style="display:none"></div>
   <div id="t-form">
     <div class="field fu d1">
-      <label class="lbl">Your task <span class="lbl-n">· real work · anonymised</span></label>
-      <textarea id="t-task" placeholder="Paste a specific professional task. The more domain-specific, the more interesting the model comparison." oninput="charCount('t-task','t-cc')"></textarea>
+      <label class="lbl">Your task</label>
+      <textarea id="t-task" placeholder="Paste a specific professional task. The more domain-specific, the more interesting the model comparison." oninput="cc('t-task','t-cc')"></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="hint">Sent to 3 models simultaneously. Remove names and identifying info first.</span>
-        <span class="cc" id="t-cc">0 / 20</span>
+        <span class="hint">Sent to 3 models simultaneously. Remove names and identifying info.</span>
+        <span class="char-count" id="t-cc">0 / 20</span>
       </div>
     </div>
     <div class="btn-row fu d2">
-      <button class="btn btn-p" id="t-btn" onclick="runTaste()">Send to 3 models →</button>
-      <button class="btn btn-g" onclick="goTo('verify')">← Back</button>
+      <button class="btn btn-primary" onclick="runTaste()">Send to 3 models →</button>
+      <button class="btn btn-secondary" onclick="goTo('verify')">← Back</button>
     </div>
   </div>
-  <div class="load" id="t-load" style="display:none">
-    <div class="ls"><div class="li p" id="ti1">1</div><div><div class="ll">Sending to GPT-4o, Claude, Gemini in parallel</div><div class="ls-">Model identities hidden — only labels shown</div></div></div>
-    <div class="ls"><div class="li p" id="ti2">2</div><div><div class="ll">Collecting responses</div><div class="ls-">Anonymising as Model A, B, C</div></div></div>
-    <div class="ls"><div class="li p" id="ti3">3</div><div><div class="ll">Ready for your evaluation</div><div class="ls-">Read carefully — no brand names shown</div></div></div>
+  <div class="load-steps" id="t-load" style="display:none">
+    <div class="ls"><div class="li pending" id="ti1">1</div><div><div class="ls-title">Sending to GPT-4o, Claude, Gemini in parallel</div><div class="ls-sub">Model identities hidden — labels only</div></div></div>
+    <div class="ls"><div class="li pending" id="ti2">2</div><div><div class="ls-title">Collecting responses</div><div class="ls-sub">Anonymising as Model A, B, C</div></div></div>
+    <div class="ls"><div class="li pending" id="ti3">3</div><div><div class="ls-title">Ready for your evaluation</div><div class="ls-sub">Read carefully — no brand names shown</div></div></div>
   </div>
   <div id="t-resp" style="display:none">
-    <div class="ttbadge fu" id="tt-badge" style="display:none">🎯 <span id="tt-text"></span></div>
-    <p class="fu" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:12px">Three anonymous responses — select the best</p>
-    <div class="rgrid" id="rgrid"></div>
+    <div class="task-badge" id="tt-badge" style="display:none">🎯 <span id="tt-text"></span></div>
+    <p style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:12px">Three anonymous responses — select the best one</p>
+    <div class="response-grid" id="resp-grid"></div>
     <div class="btn-row" style="margin-top:16px">
-      <button class="btn btn-p" id="vote-btn" onclick="submitVote()" disabled>Vote for selected →</button>
-      <button class="btn btn-g" onclick="resetTaste()">Start over</button>
+      <button class="btn btn-primary" id="vote-btn" onclick="submitVote()" disabled>Vote for selected →</button>
+      <button class="btn btn-secondary" onclick="resetTaste()">Start over</button>
     </div>
   </div>
 </div>
 </div>
 
-<!-- ══ REVEAL ═════════════════════════════════════════════════════════ -->
+<!-- ══ REVEAL ════════════════════════════════════════════════════════════════ -->
 <div id="s-reveal" class="screen">
-  <div class="rv-hero">
-    <p class="rv-tag fu">The Reveal</p>
-    <h2 class="rv-h1 fu d1">YOU PREFERRED<br/><span id="rv-model" style="color:var(--gemini)">—</span></h2>
-    <p class="rv-sub fu d2" id="rv-sub"></p>
-    <p class="rv-peer fu d3" id="rv-peer" style="display:none"></p>
-    <div class="share-card fu d3" id="sc">
-      <div class="sc-prof" id="sc-prof"></div>
-      <div class="sc-title">MY AI STACK · 2026</div>
-      <div class="sc-winner" id="sc-winner">
+  <div class="reveal-hero">
+    <div class="rv-tag">The Reveal</div>
+    <h2 class="rv-h1">You preferred<br/><span class="rv-winner" id="rv-model">—</span></h2>
+    <p class="rv-sub" id="rv-sub"></p>
+    <p class="rv-peer" id="rv-peer" style="display:none"></p>
+    <div class="share-card" id="share-card">
+      <div class="sc-eyebrow">Vantage of AI · Professional Test</div>
+      <div class="sc-title" id="sc-title">My AI Stack · 2026</div>
+      <div class="sc-winner-row" id="sc-winner-row">
         <div class="sc-trophy">🏆</div>
         <div>
           <div class="sc-wl" id="sc-wl"></div>
           <div class="sc-wn" id="sc-wn"></div>
         </div>
       </div>
-      <div class="sc-tt" id="sc-tt"></div>
       <div class="sc-task" id="sc-task"></div>
-      <div class="sc-foot"><div class="sc-brand">VANTAGE OF AI</div><div class="sc-date" id="sc-date"></div></div>
-    </div>
-    <div class="share-actions fu d4">
-      <button class="btn btn-p" onclick="copyShare()">📋 Copy share text</button>
-      <button class="btn btn-g" onclick="shareLinkedIn()">Share on LinkedIn</button>
-      <button class="btn btn-g" onclick="startOver()">Test another task</button>
-    </div>
-  </div>
-  <div class="wrap" style="padding-top:24px">
-    <div class="dims fu" id="dims">
-      <div class="dim-t">Rate the winner on these dimensions</div>
-      <div class="dim-s">Your structured ratings are what make Vantage different from a simple preference poll — they build the professional AI index.</div>
-      <div class="dim-rows" id="dim-rows"></div>
-      <div class="btn-row" style="margin-top:20px">
-        <button class="btn btn-v" onclick="submitDims()">Submit ratings →</button>
+      <div class="sc-foot">
+        <div class="sc-brand">Vantage</div>
+        <div class="sc-date" id="sc-date"></div>
       </div>
     </div>
-    <div class="dims fu d1" id="dims-done" style="display:none">
-      <div class="dim-t" style="color:var(--verified)">✓ Ratings submitted</div>
-      <div class="dim-s">Your vote is now part of the leaderboard.</div>
+    <div class="share-actions">
+      <button class="btn btn-secondary btn-sm" onclick="copyShare()">📋 Copy share text</button>
+      <button class="btn btn-secondary btn-sm" onclick="shareLinkedIn()">Share on LinkedIn</button>
+      <button class="btn btn-primary btn-sm" onclick="startOver()">Test another task</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="dims-card fu" id="dims-card">
+      <div class="dims-title">Rate the winner on these dimensions</div>
+      <div class="dims-sub">Your structured ratings are what make Vantage different from a simple preference poll — they build the professional AI index that can't be gamed.</div>
+      <div id="dim-rows"></div>
+      <div class="btn-row" style="margin-top:20px">
+        <button class="btn btn-blue" onclick="submitDims()">Submit ratings →</button>
+      </div>
+    </div>
+    <div class="dims-card fu d1" id="dims-done" style="display:none">
+      <div class="dims-title" style="color:var(--green)">✓ Ratings submitted</div>
+      <div class="dims-sub">Your vote is now part of the leaderboard.</div>
       <div class="btn-row" style="margin-top:12px">
-        <button class="btn btn-p" onclick="goLB()">See leaderboard ↗</button>
+        <button class="btn btn-primary" onclick="goTo('lb')">See leaderboard →</button>
+        <button class="btn btn-secondary" onclick="goTo('profile')">View your history</button>
       </div>
     </div>
     <div style="margin-top:32px">
-      <p style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:14px">All three responses — revealed</p>
-      <div class="rgrid" id="rv-grid"></div>
+      <p style="font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px">All three responses — revealed</p>
+      <div class="response-grid" id="rv-grid"></div>
     </div>
   </div>
 </div>
 
-<!-- ══ LEADERBOARD ════════════════════════════════════════════════════ -->
+<!-- ══ LEADERBOARD ═══════════════════════════════════════════════════════════ -->
 <div id="s-lb" class="screen">
-<div class="lb-wrap">
-  <h1 class="lb-h fu">Leaderboard</h1>
-  <p class="lb-s fu d1">Aggregated votes from verified professionals. Real time.</p>
-  <div class="lb-stats fu d1">
-    <div class="lb-stat"><div class="lb-sv" id="lb-votes">—</div><div class="lb-sl">Total votes</div></div>
-    <div class="lb-stat"><div class="lb-sv" id="lb-sess">—</div><div class="lb-sl">Sessions run</div></div>
-    <div class="lb-stat"><div class="lb-sv" id="lb-profs">—</div><div class="lb-sl">Professions</div></div>
+  <div class="lb-header">
+    <div class="lb-inner">
+      <h1 class="lb-h fu">Leaderboard</h1>
+      <p class="lb-s fu d1">Aggregated votes from verified professionals. Updated in real time.</p>
+      <div class="lb-meta fu d2">
+        <div class="lb-stat"><div class="lb-sv" id="lb-votes">—</div><div class="lb-sl">Total votes</div></div>
+        <div class="lb-stat"><div class="lb-sv" id="lb-sess">—</div><div class="lb-sl">Sessions</div></div>
+        <div class="lb-stat"><div class="lb-sv" id="lb-users">—</div><div class="lb-sl">Professionals</div></div>
+      </div>
+    </div>
   </div>
-  <div class="lb-filters fu d2" id="lb-filters"></div>
-  <div class="lb-table fu d3" id="lb-table"><div class="no-data">Loading...</div></div>
-  <div class="btn-row fu d3">
-    <button class="btn btn-g" onclick="goTo('home')">← Home</button>
-    <button class="btn btn-p" onclick="goTo('verify')">Run a test →</button>
+  <div class="lb-body">
+    <div class="lb-filters fu" id="lb-filters"></div>
+    <div class="lb-layout fu d1">
+      <div>
+        <div class="lb-section-title">Rankings</div>
+        <div class="lb-table" id="lb-table"><div class="no-data">Loading...</div></div>
+      </div>
+      <div>
+        <div class="lb-section-title">Win rate comparison</div>
+        <div class="chart-card" style="margin-bottom:16px">
+          <div class="chart-wrap"><canvas id="bar-chart"></canvas></div>
+        </div>
+        <div class="lb-section-title">Votes over time</div>
+        <div class="chart-card">
+          <div class="chart-wrap"><canvas id="line-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row fu d2">
+      <button class="btn btn-secondary" onclick="goTo('home')">← Home</button>
+      <button class="btn btn-primary" onclick="goTo('verify')">Run a test →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROFILE ═══════════════════════════════════════════════════════════════ -->
+<div id="s-profile" class="screen">
+<div class="profile-wrap">
+  <div class="profile-header fu">
+    <div class="profile-avatar" id="p-avatar"></div>
+    <div>
+      <div class="profile-name" id="p-name"></div>
+      <div class="profile-email" id="p-email"></div>
+    </div>
+    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="logout()">Sign out</button>
+  </div>
+  <div class="profile-stats fu d1">
+    <div class="ps-item">
+      <div class="ps-v" id="p-votes">0</div>
+      <div class="ps-l">Tests completed</div>
+    </div>
+    <div class="ps-item">
+      <div class="ps-v" id="p-trust">0.50</div>
+      <div class="ps-l">Trust score</div>
+      <div class="trust-bar"><div class="trust-fill" id="p-trust-bar"></div></div>
+    </div>
+    <div class="ps-item">
+      <div class="ps-v" id="p-rank">—</div>
+      <div class="ps-l">Votes to full weight</div>
+    </div>
+  </div>
+  <div class="lb-section-title fu d2" style="margin-bottom:12px">Your test history</div>
+  <div id="p-history" class="fu d3"></div>
+  <div class="btn-row fu d3" style="margin-top:20px">
+    <button class="btn btn-primary" onclick="goTo('verify')">Run another test →</button>
   </div>
 </div>
 </div>
 
 <script>
-const API = "http://localhost:8000"; // Change to https://vantage-api-7mc2.onrender.com for production
+const API = "http://localhost:8000";
 let useMock = true;
 let selProf = "";
 let sessionId = null;
@@ -611,164 +891,282 @@ let voteData = null;
 let dimRatings = {};
 let profDims = [];
 let taskType = "";
-let PROFS = [];
+let PROFS = {};
+let currentUser = null;
+let authToken = null;
+let barChart = null;
+let lineChart = null;
 
-// ── Profession list ────────────────────────────────────────────────────
-async function loadProfs() {
-  try {
-    const r = await fetch(`${API}/professions`);
-    PROFS = Object.keys(await r.json());
-  } catch {
-    PROFS = ["Data Scientist","Software Engineer","ML Engineer","Contract Attorney",
-             "Financial Analyst","Product Manager","Marketing Manager","UX Designer",
-             "Accountant / CPA","HR Manager","Radiologist","Journalist"];
+// ── Auth state ─────────────────────────────────────────────────────────────
+function loadAuthState() {
+  authToken = localStorage.getItem('vantage_token');
+  const userStr = localStorage.getItem('vantage_user');
+  if (userStr) {
+    try { currentUser = JSON.parse(userStr); } catch{}
   }
-  const g = document.getElementById('pgrid');
-  g.innerHTML = PROFS.map(p =>
-    `<div class="pc" onclick="selP(this,'${p}')">${p}</div>`
-  ).join('');
+  updateNavAuth();
 }
 
-function selP(el, val) {
-  document.querySelectorAll('.pc').forEach(c => c.classList.remove('s'));
-  el.classList.add('s');
-  selProf = val;
+function saveAuth(data) {
+  authToken = data.access_token;
+  currentUser = data.user;
+  localStorage.setItem('vantage_token', data.access_token);
+  if (data.refresh_token) localStorage.setItem('vantage_refresh', data.refresh_token);
+  localStorage.setItem('vantage_user', JSON.stringify(data.user));
+  updateNavAuth();
 }
 
-// ── Mode ───────────────────────────────────────────────────────────────
-function toggleMode() {
-  useMock = !useMock;
-  const tr = document.getElementById('t-tr');
-  const nt = document.getElementById('t-nt');
-  const pill = document.getElementById('mode-pill');
-  if (useMock) {
-    tr?.classList.add('on'); nt.textContent = 'No API key needed';
-    pill.textContent = 'MOCK'; pill.className = 'n-pill';
+function logout() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('vantage_token');
+  localStorage.removeItem('vantage_refresh');
+  localStorage.removeItem('vantage_user');
+  updateNavAuth();
+  goTo('home');
+}
+
+function updateNavAuth() {
+  const unauthed = document.getElementById('nav-user');
+  const authed = document.getElementById('nav-authed');
+  const avatar = document.getElementById('nav-avatar');
+  if (currentUser) {
+    unauthed.style.display = 'none';
+    authed.style.display = 'flex';
+    avatar.textContent = (currentUser.name || currentUser.email || '?').charAt(0).toUpperCase();
   } else {
-    tr?.classList.remove('on'); nt.textContent = 'Using real APIs';
-    pill.textContent = 'LIVE'; pill.className = 'n-pill live';
+    unauthed.style.display = 'flex';
+    authed.style.display = 'none';
   }
 }
 
-// ── Navigation ─────────────────────────────────────────────────────────
+function authHeaders() {
+  return authToken ? {'Content-Type':'application/json','Authorization':`Bearer ${authToken}`}
+                   : {'Content-Type':'application/json'};
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal(tab='login') {
+  document.getElementById('auth-modal').classList.add('open');
+  switchTab(tab);
+  document.getElementById('auth-err').style.display = 'none';
+}
+function closeModal() { document.getElementById('auth-modal').classList.remove('open'); }
+function closeModalOutside(e) { if(e.target.id==='auth-modal') closeModal(); }
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+}
+
+async function submitLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) return showAuthErr('Please fill in all fields');
+  try {
+    const res = await fetch(`${API}/auth/login`, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pw})});
+    const data = await res.json();
+    if (!res.ok) return showAuthErr(data.detail || 'Login failed');
+    saveAuth(data); closeModal();
+  } catch(e) { showAuthErr('Connection error'); }
+}
+
+async function submitRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  if (!name || !email || !pw) return showAuthErr('Please fill in all fields');
+  if (pw.length < 8) return showAuthErr('Password must be at least 8 characters');
+  try {
+    const res = await fetch(`${API}/auth/register`, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,email,password:pw})});
+    const data = await res.json();
+    if (!res.ok) return showAuthErr(data.detail || 'Registration failed');
+    saveAuth(data); closeModal();
+  } catch(e) { showAuthErr('Connection error'); }
+}
+
+function googleSignIn() {
+  if (!window.google) {
+    showAuthErr('Google Sign-In not configured. Add GOOGLE_CLIENT_ID to your .env and load the Google Identity script.');
+    return;
+  }
+  window.google.accounts.id.initialize({
+    client_id: 'YOUR_GOOGLE_CLIENT_ID',
+    callback: async (response) => {
+      try {
+        const res = await fetch(`${API}/auth/google`, {method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({id_token:response.credential})});
+        const data = await res.json();
+        if (!res.ok) return showAuthErr(data.detail || 'Google auth failed');
+        saveAuth(data); closeModal();
+      } catch(e) { showAuthErr('Google auth error'); }
+    }
+  });
+  window.google.accounts.id.prompt();
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('auth-err');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
 function goTo(id) {
-  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','in'); });
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const t = document.getElementById(`s-${id}`);
   if (!t) return;
   t.classList.add('active');
-  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('in')));
   window.scrollTo({top:0,behavior:'smooth'});
-
-  const order = ['v','t','vo','r'];
-  const map = {verify:'v',taste:'t',reveal:'r'};
-  const idx = order.indexOf(map[id]??'');
-  order.forEach((k,i) => {
-    const el = document.getElementById(`nb-${k}`);
-    if (!el) return;
-    el.className = 'n-step' + (i < idx ? ' done' : i === idx ? ' active' : '');
-  });
+  document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active'));
 
   if (id === 'taste') {
     const vt = document.getElementById('v-task').value;
     const tt = document.getElementById('t-task');
-    if (vt && !tt.value) { tt.value = vt; charCount('t-task','t-cc'); }
+    if (vt && !tt.value) { tt.value = vt; cc('t-task','t-cc'); }
   }
   if (id === 'lb') loadLB();
+  if (id === 'profile') loadProfile();
+  if (id === 'home') loadStats();
 }
 
-function goLB() { goTo('lb'); }
-
-// Show home immediately
-requestAnimationFrame(() => document.getElementById('s-home').classList.add('in'));
-
-// ── Utils ──────────────────────────────────────────────────────────────
-function charCount(src, dst) {
+// ── Utils ──────────────────────────────────────────────────────────────────
+function cc(src, dst) {
   const n = document.getElementById(src).value.trim().length;
   const el = document.getElementById(dst);
   el.textContent = `${n} / 20`;
-  el.className = 'cc' + (n >= 20 ? ' ok' : '');
+  el.className = 'char-count' + (n >= 20 ? ' ok' : '');
 }
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep = ms => new Promise(r => setTimeout(r,ms));
 function setLI(id, state) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = `li ${state === 'p' ? 'p' : state === 'r' ? 'r' : 'd'}`;
-  if (state === 'd') el.textContent = '✓';
+  const el = document.getElementById(id); if(!el) return;
+  el.className = `li ${state}`;
+  if (state==='done') el.textContent='✓';
+  else if (state==='pending') el.textContent=id.replace(/\D/g,'');
 }
-function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
-function hideErr(id) { document.getElementById(id).style.display = 'none'; }
+function showErr(id, msg) { const e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+function hideErr(id) { document.getElementById(id).style.display='none'; }
 function esc(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Live counter ───────────────────────────────────────────────────────
-async function loadLiveCounter() {
+// ── Profession grid ────────────────────────────────────────────────────────
+async function loadProfs() {
   try {
-    const res = await fetch(`${API}/stats`);
-    const d = await res.json();
-    if (!d.by_profession?.length) return;
-    const wrap = document.getElementById('live-counter');
-    const pills = document.getElementById('lc-pills');
-    wrap.style.display = 'block';
-    pills.innerHTML = d.by_profession.slice(0,8).map(p =>
-      `<div style="padding:5px 12px;background:var(--s2);border:1px solid var(--border);border-radius:100px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px">
-        <span style="color:var(--text)">${p.profession}</span>
-        <span style="color:var(--gemini);font-family:var(--mono)">${p.count}</span>
-      </div>`
-    ).join('');
+    const r = await fetch(`${API}/professions`);
+    PROFS = await r.json();
+  } catch {
+    PROFS = {"Data Scientist":{"group":"Technical","dimensions":["Statistical correctness","Code quality","Assumption clarity"],"task_types":["Model selection","EDA & visualization","Feature engineering","Evaluation & metrics","Deployment & MLOps"]}};
+  }
+  renderProfGrid();
+}
+
+function renderProfGrid() {
+  const groups = {};
+  Object.entries(PROFS).forEach(([name,cfg]) => {
+    const g = cfg.group || 'Other';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(name);
+  });
+  const container = document.getElementById('prof-grid-container');
+  container.innerHTML = Object.entries(groups).map(([group, profs]) => `
+    <div class="prof-group">
+      <div class="prof-group-label">${group}</div>
+      <div class="prof-grid">
+        ${profs.map(p => `<button class="prof-btn" onclick="selProf(this,'${p}')">${p}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selProf(el, val) {
+  document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selProf = val;
+}
+// fix naming conflict
+let _selProf = '';
+function selProf(el, val) {
+  document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  _selProf = val;
+}
+
+// ── Mode toggle ───────────────────────────────────────────────────────────
+function toggleMode() {
+  useMock = !useMock;
+  const sw = document.getElementById('t-sw');
+  const note = document.getElementById('t-note');
+  sw.classList.toggle('on', useMock);
+  note.textContent = useMock ? 'No API key needed' : 'Using real APIs';
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/stats`);
+    const d = await r.json();
+    document.getElementById('h-votes').textContent = d.total_votes || 0;
+    document.getElementById('h-sessions').textContent = d.total_sessions || 0;
+    document.getElementById('h-users').textContent = d.total_users || 0;
+    document.getElementById('h-profs').textContent = Object.keys(PROFS).length || 22;
+
+    if (d.by_profession?.length) {
+      const counter = document.getElementById('live-counter');
+      counter.style.display = 'block';
+      document.getElementById('lc-pills').innerHTML = d.by_profession.slice(0,8).map(p =>
+        `<div class="lc-pill">${p.profession}<span class="lc-count">${p.count}</span></div>`
+      ).join('');
+    }
   } catch {}
 }
 
-// Poll every 30s
-loadLiveCounter();
-setInterval(loadLiveCounter, 30000);
-
-// ── VERIFY ─────────────────────────────────────────────────────────────
+// ── Verify ────────────────────────────────────────────────────────────────
 async function runVerify() {
   hideErr('v-err');
   const url = document.getElementById('v-url').value.trim();
   const task = document.getElementById('v-task').value.trim();
-  if (!selProf) return showErr('v-err','Please select your profession.');
+  if (!_selProf) return showErr('v-err','Please select your profession.');
   if (!url) return showErr('v-err','Please enter your LinkedIn URL.');
   if (!url.startsWith('https://www.linkedin.com/in/')) return showErr('v-err','URL must start with https://www.linkedin.com/in/');
   if (task.length < 20) return showErr('v-err','Task must be at least 20 characters.');
 
-  document.getElementById('v-form').style.display = 'none';
-  document.getElementById('v-load').style.display = 'flex';
-  document.getElementById('v-result').style.display = 'none';
+  document.getElementById('v-form').style.display='none';
+  document.getElementById('v-load').style.display='flex';
+  document.getElementById('v-result').style.display='none';
 
-  setLI('vi1','r'); await sleep(useMock ? 700 : 3000);
-  setLI('vi1','d'); setLI('vi2','r'); await sleep(useMock ? 600 : 3500);
-  setLI('vi2','d'); setLI('vi3','r');
+  setLI('vi1','running'); await sleep(useMock?700:2000);
+  setLI('vi1','done'); setLI('vi2','running'); await sleep(useMock?600:2500);
+  setLI('vi2','done'); setLI('vi3','running');
 
   let data;
   try {
     const res = await fetch(`${API}/verify`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({linkedin_url:url, claimed_profession:selProf, submitted_task:task, use_mock:useMock})
+      method:'POST', headers:authHeaders(),
+      body:JSON.stringify({linkedin_url:url, claimed_profession:_selProf, submitted_task:task, use_mock:useMock})
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    if (!res.ok) { const e=await res.json(); throw new Error(e.detail); }
     data = await res.json();
   } catch(e) {
-    document.getElementById('v-load').style.display = 'none';
-    document.getElementById('v-form').style.display = 'block';
-    return showErr('v-err', `Error: ${e.message}. Is the backend running on port 8000?`);
+    document.getElementById('v-load').style.display='none';
+    document.getElementById('v-form').style.display='block';
+    return showErr('v-err',`Error: ${e.message}`);
   }
 
-  await sleep(300); setLI('vi3','d'); await sleep(200);
+  await sleep(300); setLI('vi3','done'); await sleep(200);
   profDims = data.dimensions || [];
 
-  document.getElementById('v-load').style.display = 'none';
-  document.getElementById('v-result').style.display = 'block';
+  document.getElementById('v-load').style.display='none';
+  document.getElementById('v-result').style.display='block';
 
-  // Verdict
   const head = document.getElementById('vr-head');
-  head.className = `vh ${data.verdict}`;
+  head.className = `verdict-head ${data.verdict}`;
   const badge = document.getElementById('vr-b');
-  badge.className = `vbadge ${data.verdict}`;
+  badge.className = `v-badge ${data.verdict}`;
   badge.textContent = data.verdict.toUpperCase();
-  document.getElementById('vr-t').textContent = {verified:'Identity verified ✓', review:'Needs human review', flagged:'Verification failed'}[data.verdict];
+  document.getElementById('vr-t').textContent = {verified:'Identity verified ✓',review:'Needs review',flagged:'Verification failed'}[data.verdict];
   document.getElementById('vr-r').textContent = data.reasoning;
 
-  // Scores
   const p = v => `${Math.round(v*100)}%`;
   document.getElementById('sv-c').textContent = p(data.confidence);
   document.getElementById('sf-c').style.width = p(data.confidence);
@@ -777,205 +1175,154 @@ async function runVerify() {
   document.getElementById('sv-v').textContent = `${data.vote_weight||0.5}x`;
   document.getElementById('sf-v').style.width = p(data.vote_weight||0.5);
 
-  // LinkedIn profile card
-  if (data.profile && data.profile.scrape_success) {
-    const prof = data.profile;
-    const initial = (prof.name || selProf).charAt(0).toUpperCase();
-    document.getElementById('v-prof-wrap').style.display = 'block';
-    document.getElementById('v-prof-card').innerHTML = `
-      <div class="prof-avatar">${initial}</div>
-      <div>
-        <div class="prof-name">${prof.name || 'Profile found'}</div>
-        <div class="prof-headline">${prof.headline || prof.current_role || selProf}</div>
-      </div>
-      <div class="prof-badge">${prof.scrape_method === 'mock' ? 'MOCK' : 'SCRAPED'}</div>
-    `;
-  }
-
-  // Flags
+  if (data.pii_masked) document.getElementById('pii-note').style.display='flex';
   if (data.flags?.length) {
-    document.getElementById('fl-wrap').style.display = 'block';
-    document.getElementById('fl-list').innerHTML = data.flags.map(f => `<div class="fl">⚠ ${f}</div>`).join('');
+    document.getElementById('fl-wrap').style.display='block';
+    document.getElementById('fl-list').innerHTML = data.flags.map(f =>
+      `<div style="padding:8px 12px;background:var(--amber-l);border:1px solid #FDE68A;border-radius:6px;font-size:12px;color:var(--amber);font-weight:500;margin-bottom:6px">⚠ ${f}</div>`
+    ).join('');
   }
-
-  // PII indicator
-  if (data.pii_masked) {
-    const existing = document.getElementById('pii-note');
-    if (!existing) {
-      const note = document.createElement('div');
-      note.id = 'pii-note';
-      note.style.cssText = 'padding:9px 13px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;font-size:12px;color:var(--verified);font-weight:500';
-      note.textContent = '🔒 PII automatically masked before sending to AI models';
-      document.getElementById('fl-wrap').insertAdjacentElement('afterend', note);
-    }
-  }
-
-  if (data.verdict === 'flagged') {
-    const btn = document.getElementById('v-proceed');
-    btn.disabled = true; btn.textContent = 'Cannot proceed';
+  if (data.verdict==='flagged') {
+    const btn=document.getElementById('v-proceed');
+    btn.disabled=true; btn.textContent='Cannot proceed';
   }
 }
 
 function resetVerify() {
-  document.getElementById('v-result').style.display = 'none';
-  document.getElementById('v-form').style.display = 'block';
-  document.getElementById('fl-wrap').style.display = 'none';
-  document.getElementById('v-prof-wrap').style.display = 'none';
-  document.getElementById('v-proceed').disabled = false;
-  document.getElementById('v-proceed').textContent = 'Continue to blind test →';
-  ['vi1','vi2','vi3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+  document.getElementById('v-result').style.display='none';
+  document.getElementById('v-form').style.display='block';
+  document.getElementById('pii-note').style.display='none';
+  document.getElementById('fl-wrap').style.display='none';
+  const btn=document.getElementById('v-proceed');
+  btn.disabled=false; btn.textContent='Continue to blind test →';
+  ['vi1','vi2','vi3'].forEach((id,i) => setLI(id,'pending'));
 }
 
-// ── TASTE TEST ─────────────────────────────────────────────────────────
+// ── Taste test ────────────────────────────────────────────────────────────
 async function runTaste() {
   hideErr('t-err');
   const task = document.getElementById('t-task').value.trim();
   if (task.length < 20) return showErr('t-err','Task must be at least 20 characters.');
 
-  document.getElementById('t-form').style.display = 'none';
-  document.getElementById('t-load').style.display = 'flex';
-  document.getElementById('t-resp').style.display = 'none';
+  document.getElementById('t-form').style.display='none';
+  document.getElementById('t-load').style.display='flex';
+  document.getElementById('t-resp').style.display='none';
   selIdx = null;
 
-  setLI('ti1','r'); await sleep(useMock ? 700 : 2000);
-  setLI('ti1','d'); setLI('ti2','r'); await sleep(useMock ? 500 : 5000);
-  setLI('ti2','d'); setLI('ti3','r');
+  setLI('ti1','running'); await sleep(useMock?700:1500);
+  setLI('ti1','done'); setLI('ti2','running'); await sleep(useMock?500:4000);
+  setLI('ti2','done'); setLI('ti3','running');
 
   let data;
   try {
     const res = await fetch(`${API}/taste-test`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({task, profession:selProf||'Data Scientist', use_mock:useMock})
+      method:'POST', headers:authHeaders(),
+      body:JSON.stringify({task, profession:_selProf||'Data Scientist', use_mock:useMock})
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    if (!res.ok) { const e=await res.json(); throw new Error(e.detail); }
     data = await res.json();
   } catch(e) {
-    document.getElementById('t-load').style.display = 'none';
-    document.getElementById('t-form').style.display = 'block';
-    return showErr('t-err', `Error: ${e.message}`);
+    document.getElementById('t-load').style.display='none';
+    document.getElementById('t-form').style.display='block';
+    return showErr('t-err',`Error: ${e.message}`);
   }
 
   sessionId = data.session_id;
   taskType = data.task_type || '';
   if (data.profession_dimensions) profDims = data.profession_dimensions;
 
-  await sleep(300); setLI('ti3','d'); await sleep(200);
-  document.getElementById('t-load').style.display = 'none';
+  await sleep(300); setLI('ti3','done'); await sleep(200);
+  document.getElementById('t-load').style.display='none';
 
   if (taskType) {
-    document.getElementById('tt-badge').style.display = 'inline-flex';
+    document.getElementById('tt-badge').style.display='inline-flex';
     document.getElementById('tt-text').textContent = taskType;
   }
 
-  renderRespCards(data.responses);
-}
-
-function renderRespCards(responses) {
-  document.getElementById('t-resp').style.display = 'block';
-  document.getElementById('rgrid').innerHTML = responses.map((r,i) => `
-    <div class="rc fu" id="rc-${i}" onclick="selR(${i})" style="animation-delay:${i*.1}s">
-      <div class="rh">
-        <span class="rl">${r.label}</span>
-        <span class="rtype">${taskType || 'Professional task'}</span>
-        ${r.latency_ms ? `<span style="font-family:var(--mono);font-size:10px;color:var(--dim)">${Math.round(r.latency_ms)}ms</span>` : ''}
-        <span class="rsel">Select →</span>
+  document.getElementById('t-resp').style.display='block';
+  document.getElementById('resp-grid').innerHTML = data.responses.map((r,i) => `
+    <div class="resp-card" id="rc-${i}" onclick="selR(${i})">
+      <div class="resp-head">
+        <span class="resp-label">${r.label}</span>
+        <span class="resp-type">${taskType||'Professional task'}</span>
+        ${r.latency_ms ? `<span class="resp-latency">${Math.round(r.latency_ms)}ms</span>` : ''}
+        <span class="resp-sel">Select →</span>
       </div>
-      <div class="rbody">${esc(r.response)}</div>
+      <div class="resp-body">${esc(r.response)}</div>
     </div>
   `).join('');
 }
 
 function selR(idx) {
   selIdx = idx;
-  document.querySelectorAll('.rc').forEach((c,i) => c.classList.toggle('sel', i===idx));
+  document.querySelectorAll('.resp-card').forEach((c,i) => c.classList.toggle('selected',i===idx));
   document.getElementById('vote-btn').disabled = false;
 }
 
 function resetTaste() {
-  document.getElementById('t-resp').style.display = 'none';
-  document.getElementById('t-form').style.display = 'block';
-  ['ti1','ti2','ti3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+  document.getElementById('t-resp').style.display='none';
+  document.getElementById('t-form').style.display='block';
+  ['ti1','ti2','ti3'].forEach(id => setLI(id,'pending'));
 }
 
-// ── VOTE ───────────────────────────────────────────────────────────────
+// ── Vote ──────────────────────────────────────────────────────────────────
 async function submitVote() {
-  if (selIdx === null) return;
+  if (selIdx===null) return;
   const btn = document.getElementById('vote-btn');
-  btn.disabled = true; btn.textContent = 'Submitting…';
-
+  btn.disabled=true; btn.textContent='Submitting…';
   try {
     const res = await fetch(`${API}/vote`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({session_id:sessionId, chosen_index:selIdx})
+      method:'POST', headers:authHeaders(),
+      body:JSON.stringify({session_id:sessionId, chosen_index:selIdx})
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    if (!res.ok) { const e=await res.json(); throw new Error(e.detail); }
     voteData = await res.json();
   } catch(e) {
-    btn.disabled = false; btn.textContent = 'Vote for selected →';
-    return showErr('t-err', `Error: ${e.message}`);
+    btn.disabled=false; btn.textContent='Vote for selected →';
+    return showErr('t-err',`Error: ${e.message}`);
+  }
+
+  // Update user vote count in memory
+  if (currentUser && voteData.user_vote_count) {
+    currentUser.vote_count = voteData.user_vote_count;
+    localStorage.setItem('vantage_user', JSON.stringify(currentUser));
   }
 
   renderReveal(voteData);
   goTo('reveal');
 }
 
-// ── REVEAL ─────────────────────────────────────────────────────────────
+// ── Reveal ────────────────────────────────────────────────────────────────
 function renderReveal(d) {
-  const color = d.winner_color || 'var(--gemini)';
+  const colorMap = {'Gemini 2.0 Flash':'#1B4FD8','GPT-4o':'#0D9373','Claude Sonnet':'#C2410C'};
+  const color = colorMap[d.winner_model] || '#1B4FD8';
+
   document.getElementById('rv-model').textContent = d.winner_model;
   document.getElementById('rv-model').style.color = color;
   document.getElementById('rv-sub').textContent = d.surprise_message;
 
   const peer = document.getElementById('rv-peer');
-  if (d.peer_comparison) { peer.style.display = 'inline-block'; peer.textContent = d.peer_comparison; }
-
-  // Bias flags warning
-  const biasFlags = d.reveal?.flatMap(r => r.bias?.flags || []) || [];
-  if (biasFlags.length > 0) {
-    const existing = document.getElementById('bias-warn');
-    if (!existing) {
-      const warn = document.createElement('div');
-      warn.id = 'bias-warn';
-      warn.style.cssText = 'display:inline-block;margin:0 auto 20px;font-size:11px;font-weight:600;color:var(--review);padding:5px 16px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:100px;position:relative;z-index:1';
-      warn.textContent = `⚠ Bias check flagged ${biasFlags.length} item(s) in responses`;
-      peer.insertAdjacentElement('afterend', warn);
-    }
-  }
+  if (d.peer_comparison) { peer.style.display='inline-block'; peer.textContent=d.peer_comparison; }
 
   // Share card
-  document.getElementById('sc-prof').textContent = (selProf||'Professional').toUpperCase();
-  const winner = d.reveal.find(r => r.won);
-  const sc = document.getElementById('sc-winner');
-  sc.style.background = `rgba(${hexToRgb(color.replace('var(--gemini)','#4285F4'))},0.1)`;
-  sc.style.borderColor = `rgba(${hexToRgb(color.replace('var(--gemini)','#4285F4'))},0.25)`;
+  document.getElementById('sc-title').textContent = `${_selProf||'Professional'} AI Test`;
+  document.getElementById('sc-wl').textContent = (d.reveal.find(r=>r.won)?.provider||'').toUpperCase() + ' · WINNER';
   document.getElementById('sc-wl').style.color = color;
-  document.getElementById('sc-wl').textContent = winner?.provider?.toUpperCase() + ' · TOP MODEL';
   document.getElementById('sc-wn').textContent = d.winner_model;
-  document.getElementById('sc-tt').textContent = d.scorecard.task_type;
   document.getElementById('sc-task').textContent = d.scorecard.task_preview;
   document.getElementById('sc-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
 
-  // PCI score badge
+  // PCI badge
   if (d.pci_score) {
-    const existing = document.getElementById('pci-badge');
-    if (!existing) {
-      const badge = document.createElement('div');
-      badge.id = 'pci-badge';
-      badge.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.2);border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gemini);margin-bottom:16px';
-      badge.innerHTML = `PCI Score: ${(d.pci_score * 100).toFixed(1)} · <span style="color:var(--muted)">Prova Composite Index</span>`;
-      document.getElementById('rv-peer').insertAdjacentElement('afterend', badge);
-    }
-  }
-
-  // Shareable URL — update browser URL without reload
-  if (d.session_id) {
-    history.replaceState({}, '', `#scorecard/${d.session_id}`);
+    const pci = document.createElement('div');
+    pci.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue);margin-bottom:20px';
+    pci.textContent = `PCI Score: ${(d.pci_score*100).toFixed(1)}`;
+    document.getElementById('rv-peer').insertAdjacentElement('afterend', pci);
   }
 
   // Dimension rating
-  const reveal = d.reveal;
-  dimRatings = {};
-  if (profDims.length > 0) {
+  if (profDims.length) {
+    dimRatings = {};
     document.getElementById('dim-rows').innerHTML = profDims.map((dim,di) => `
       <div class="dim-row">
         <div class="dim-name">${dim}</div>
@@ -986,57 +1333,57 @@ function renderReveal(d) {
     `).join('');
   }
 
-  // Reveal grid — show provider branding + latency
-  document.getElementById('rv-grid').innerHTML = reveal.map((r,i) => `
-    <div class="rc ${r.won ? 'won' : 'lost'} fu" style="animation-delay:${i*.1}s;cursor:default">
-      <div class="rh">
-        <span class="rl">${r.label}</span>
-        <div class="mprov">
-          <div class="mprov-dot" style="background:${r.color||'#888'}"></div>
-          <span style="font-size:13px;font-weight:700;color:var(--text)">${r.model_name}</span>
-          <span class="mprov" style="font-size:11px;color:var(--dim)">${r.provider}</span>
-          ${r.source !== 'mock' ? '<span class="msrc">LIVE</span>' : '<span class="msrc">MOCK</span>'}
+  // Reveal grid
+  document.getElementById('rv-grid').innerHTML = d.reveal.map((r,i) => `
+    <div class="resp-card ${r.won?'won':'lost'}" style="cursor:default">
+      <div class="resp-head">
+        <span class="resp-label">${r.label}</span>
+        <div class="model-badge">
+          <div class="model-dot" style="background:${r.color||'#888'}"></div>
+          <span class="model-name">${r.model_name}</span>
+          <span class="model-prov">${r.provider}</span>
+          <span class="model-src">${r.source!=='mock'?'LIVE':'MOCK'}</span>
         </div>
-        ${r.latency_ms ? `<span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto">${Math.round(r.latency_ms)}ms</span>` : ''}
-        <span class="wtag ${r.won ? 'y' : 'n'}">${r.won ? '🏆 Your pick' : 'Not selected'}</span>
+        ${r.latency_ms ? `<span class="resp-latency">${Math.round(r.latency_ms)}ms</span>` : ''}
+        <span class="won-tag ${r.won?'y':'n'}">${r.won?'🏆 Your pick':'Not selected'}</span>
       </div>
-      <div class="rbody">${esc(r.response)}</div>
+      <div class="resp-body">${esc(r.response)}</div>
     </div>
   `).join('');
-}
 
-function hexToRgb(hex) {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex||'#4285F4');
-  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '66,133,244';
+  // Prompt sign up if not authenticated
+  if (!currentUser) {
+    const nudge = document.createElement('div');
+    nudge.style.cssText = 'margin-top:20px;padding:16px 20px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:12px';
+    nudge.innerHTML = `<div><div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px">Create a free account to track your history</div><div style="font-size:13px;color:var(--ink3)">Your trust score grows with every test. See all past results.</div></div><button class="btn btn-blue btn-sm" onclick="openModal('register')">Sign up free →</button>`;
+    document.getElementById('dims-card').insertAdjacentElement('afterend', nudge);
+  }
 }
 
 function rateDim(dim, score, di) {
   dimRatings[dim] = score;
   [1,2,3,4,5].forEach(s => {
     const el = document.getElementById(`star-${di}-${s}`);
-    if (el) el.classList.toggle('on', s <= score);
+    if (el) el.classList.toggle('on', s<=score);
   });
 }
 
 async function submitDims() {
-  if (Object.keys(dimRatings).length === 0) return;
+  if (!Object.keys(dimRatings).length) return;
   try {
     await fetch(`${API}/rate-dimensions`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({session_id:sessionId, ratings:dimRatings})
+      method:'POST', headers:authHeaders(),
+      body:JSON.stringify({session_id:sessionId, ratings:dimRatings})
     });
-  } catch(e) {}
-  document.getElementById('dims').style.display = 'none';
-  document.getElementById('dims-done').style.display = 'block';
+  } catch {}
+  document.getElementById('dims-card').style.display='none';
+  document.getElementById('dims-done').style.display='block';
 }
 
 function copyShare() {
   if (!voteData) return;
-  const text = voteData.scorecard.share_url
-    ? `${voteData.scorecard.share_text}`
-    : voteData.scorecard.share_text;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.share-actions .btn-p');
+  navigator.clipboard.writeText(voteData.scorecard.share_text).then(() => {
+    const btn = document.querySelector('.share-actions .btn-secondary');
     const orig = btn.textContent;
     btn.textContent = '✓ Copied!';
     setTimeout(() => btn.textContent = orig, 2000);
@@ -1045,76 +1392,163 @@ function copyShare() {
 
 function shareLinkedIn() {
   if (!voteData) return;
-  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://vantageofai.com&summary=${encodeURIComponent(voteData.scorecard.share_text)}`, '_blank');
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://vantageofai.com&summary=${encodeURIComponent(voteData.scorecard.share_text)}`,'_blank');
 }
 
 function startOver() {
-  sessionId = null; selIdx = null; voteData = null;
-  document.getElementById('t-task').value = '';
-  document.getElementById('t-resp').style.display = 'none';
-  document.getElementById('t-form').style.display = 'block';
-  document.getElementById('dims').style.display = 'block';
-  document.getElementById('dims-done').style.display = 'none';
-  document.getElementById('rv-peer').style.display = 'none';
-  charCount('t-task','t-cc');
-  ['ti1','ti2','ti3'].forEach((id,i) => { const el=document.getElementById(id); el.className='li p'; el.textContent=i+1; });
+  sessionId=null; selIdx=null; voteData=null;
+  document.getElementById('t-task').value='';
+  document.getElementById('t-resp').style.display='none';
+  document.getElementById('t-form').style.display='block';
+  document.getElementById('dims-card').style.display='block';
+  document.getElementById('dims-done').style.display='none';
+  document.getElementById('rv-peer').style.display='none';
+  cc('t-task','t-cc');
+  ['ti1','ti2','ti3'].forEach(id => setLI(id,'pending'));
+  document.querySelectorAll('.resp-card').forEach(c => { c.classList.remove('selected','won','lost'); });
   goTo('taste');
 }
 
-// ── LEADERBOARD ────────────────────────────────────────────────────────
-const MODEL_COLORS = {'Gemini 2.0 Flash':'#4285F4','GPT-4o':'#10A37F','Claude Sonnet':'#D97757'};
+// ── Leaderboard ────────────────────────────────────────────────────────────
+const MODEL_COLORS = {'Gemini 2.0 Flash':'#1B4FD8','GPT-4o':'#0D9373','Claude Sonnet':'#C2410C'};
 
-async function loadLB(prof = null) {
+async function loadLB(prof=null) {
   const url = prof ? `${API}/leaderboard?profession=${encodeURIComponent(prof)}` : `${API}/leaderboard`;
   try {
     const res = await fetch(url);
     renderLB(await res.json(), prof);
   } catch {
-    document.getElementById('lb-table').innerHTML = `<div class="no-data">Backend not reachable — is it running on port 8000?</div>`;
+    document.getElementById('lb-table').innerHTML = `<div class="no-data">Backend not reachable</div>`;
   }
 }
 
 function renderLB(d, prof) {
   document.getElementById('lb-votes').textContent = d.total_votes;
   document.getElementById('lb-sess').textContent = d.total_sessions;
-  document.getElementById('lb-profs').textContent = Object.keys(d.by_profession||{}).length;
+  document.getElementById('lb-users').textContent = d.total_users || 0;
 
   const profs = Object.keys(d.by_profession||{});
   document.getElementById('lb-filters').innerHTML =
-    `<button class="lb-f ${prof ? '' : 'a'}" onclick="loadLB()">All professions</button>` +
-    profs.map(p => `<button class="lb-f ${prof===p?'a':''}" onclick="loadLB('${p}')">${p}</button>`).join('');
+    `<button class="lb-filter ${!prof?'active':''}" onclick="loadLB()">All</button>` +
+    profs.map(p => `<button class="lb-filter ${prof===p?'active':''}" onclick="loadLB('${p}')">${p}</button>`).join('');
 
   const table = document.getElementById('lb-table');
-  if (!d.rankings?.length) {
-    table.innerHTML = `<div class="no-data">No votes yet. Run a test to be the first! 🚀</div>`; return;
-  }
+  if (!d.rankings?.length) { table.innerHTML=`<div class="no-data">No votes yet — run the first test! 🚀</div>`; return; }
 
   const max = d.rankings[0]?.total_votes || 1;
   table.innerHTML = d.rankings.map(r => {
-    const color = MODEL_COLORS[r.model] || '#888';
-    return `
-    <div class="lb-row">
-      <div class="lb-rank ${r.rank<=3?'g':''}">${r.rank}</div>
+    const color = MODEL_COLORS[r.model]||'#888';
+    return `<div class="lb-row">
+      <div class="lb-rank ${r.rank<=3?'top':''}">${r.rank}</div>
       <div class="lb-mi">
-        <div class="lb-mprov">
-          <div class="mprov-dot" style="background:${color};width:8px;height:8px;border-radius:50%"></div>
-          <div class="lb-mname">${r.model}</div>
-        </div>
-        <div class="lb-msub">${r.provider || ''} · ${r.rank===1?'🏆 Leading':r.total_votes+' vote'+(r.total_votes!==1?'s':'')}</div>
+        <div class="lb-mrow"><div class="lb-mdot" style="background:${color}"></div><div class="lb-mname">${r.model}</div></div>
+        <div class="lb-mprov">${r.provider}</div>
       </div>
-      <div class="lb-bar">
-        <div class="lb-bt"><div class="lb-bf" style="width:${Math.round((r.total_votes/max)*100)}%;background:${color}"></div></div>
-      </div>
-      <div class="lb-votes">
-        <div class="lb-vn">${r.total_votes}</div>
-        <div class="lb-vl">votes</div>
-      </div>
+      <div class="lb-bar-wrap"><div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${Math.round((r.total_votes/max)*100)}%;background:${color}"></div></div></div>
+      <div class="lb-pci">PCI ${(r.pci_score*100).toFixed(0)}</div>
+      <div class="lb-votes"><div class="lb-vn">${r.total_votes}</div><div class="lb-vl">votes</div></div>
     </div>`;
   }).join('');
+
+  renderCharts(d);
 }
 
-// Init
+function renderCharts(d) {
+  // Bar chart — win rates
+  const barCtx = document.getElementById('bar-chart').getContext('2d');
+  if (barChart) barChart.destroy();
+  const models = d.rankings.map(r => r.model);
+  const votes = d.rankings.map(r => r.total_votes);
+  const colors = models.map(m => MODEL_COLORS[m]||'#888');
+  barChart = new Chart(barCtx, {
+    type:'bar',
+    data:{labels:models,datasets:[{data:votes,backgroundColor:colors.map(c=>c+'33'),borderColor:colors,borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Geist Mono',size:10}}},
+              y:{grid:{color:'#E8E5DF'},ticks:{font:{family:'Geist Mono',size:10}}}}}
+  });
+
+  // Line chart — trend over time
+  const lineCtx = document.getElementById('line-chart').getContext('2d');
+  if (lineChart) lineChart.destroy();
+  if (!d.trend || !Object.keys(d.trend).length) return;
+
+  const allDays = [...new Set(Object.values(d.trend).flat().map(t=>t.day))].sort();
+  const datasets = Object.entries(d.trend).map(([model, points]) => {
+    const dayMap = Object.fromEntries(points.map(p=>[p.day,p.votes]));
+    return {
+      label:model,
+      data:allDays.map(day=>dayMap[day]||0),
+      borderColor:MODEL_COLORS[model]||'#888',
+      backgroundColor:(MODEL_COLORS[model]||'#888')+'22',
+      borderWidth:2,fill:true,tension:0.4,
+      pointRadius:3,pointBackgroundColor:MODEL_COLORS[model]||'#888'
+    };
+  });
+
+  lineChart = new Chart(lineCtx, {
+    type:'line',
+    data:{labels:allDays,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{family:'Geist Mono',size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Geist Mono',size:10},maxTicksLimit:6}},
+              y:{grid:{color:'#E8E5DF'},ticks:{font:{family:'Geist Mono',size:10}}}}}
+  });
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────
+async function loadProfile() {
+  if (!currentUser) { openModal('login'); return; }
+
+  document.getElementById('p-avatar').textContent = (currentUser.name||currentUser.email||'?').charAt(0).toUpperCase();
+  document.getElementById('p-name').textContent = currentUser.name || 'Anonymous';
+  document.getElementById('p-email').textContent = currentUser.email || '';
+  document.getElementById('p-votes').textContent = currentUser.vote_count || 0;
+  document.getElementById('p-trust').textContent = (currentUser.trust_score||0.5).toFixed(2);
+  document.getElementById('p-trust-bar').style.width = `${(currentUser.trust_score||0.5)*100}%`;
+
+  const remaining = Math.max(0, 40 - (currentUser.vote_count||0));
+  document.getElementById('p-rank').textContent = remaining > 0 ? remaining : '—';
+
+  try {
+    const res = await fetch(`${API}/auth/history`, {headers:authHeaders()});
+    const data = await res.json();
+    const hist = document.getElementById('p-history');
+    if (!data.sessions?.length) {
+      hist.innerHTML = `<div style="padding:24px;text-align:center;color:var(--ink4);font-size:14px">No tests yet — run your first test to see history here.</div>`;
+      return;
+    }
+    hist.innerHTML = data.sessions.map(s => {
+      const color = MODEL_COLORS[s.winner_model]||'#888';
+      return `<div class="history-item">
+        <div>
+          <div class="hi-prof">${s.profession}</div>
+          <div class="hi-task">${esc(s.task||'').slice(0,60)}...</div>
+        </div>
+        <div>
+          <div class="hi-winner">
+            <div class="hi-wd" style="background:${color}"></div>
+            <div class="hi-wn">${s.winner_model||'—'}</div>
+          </div>
+          <div class="hi-date">${s.voted_at ? new Date(s.voted_at).toLocaleDateString() : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('p-history').innerHTML = `<div style="padding:16px;color:var(--ink4)">Could not load history.</div>`;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+loadAuthState();
 loadProfs();
+loadStats();
+setInterval(loadStats, 30000);
+
+// Initial animation
+requestAnimationFrame(() => {
+  document.getElementById('s-home').style.opacity='1';
+});
 </script>
 </body>
 </html>
