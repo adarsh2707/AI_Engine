@@ -1091,6 +1091,7 @@ let barChart = null;
 let lineChart = null;
 let uploadedFileId = null;
 let fileMode = "context";
+let _selProf = '';
 
 // ── Auth state ─────────────────────────────────────────────────────────────
 function loadAuthState() {
@@ -1275,13 +1276,6 @@ function renderProfGrid() {
   `).join('');
 }
 
-function selProf(el, val) {
-  document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  selProf = val;
-}
-// fix naming conflict
-let _selProf = '';
 function selProf(el, val) {
   document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
