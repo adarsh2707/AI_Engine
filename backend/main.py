@@ -46,7 +46,12 @@ except ImportError as e:
 
 app = FastAPI(title="Vantage of AI", version="7.0.0")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── Config ─────────────────────────────────────────────────────────────────
 
