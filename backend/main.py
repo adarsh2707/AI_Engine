@@ -44,14 +44,32 @@ except ImportError as e:
     def extract_text(b, f, m=""): return "", "unavailable"
     def build_file_context(t, f, m): return f"[File: {f}]\n{t}\n"
 
-app = FastAPI(title="Vantage of AI", version="7.0.0")
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+app = FastAPI(title="Vantage of AI", version="9.0.0")
+
+# CORS must be added FIRST before any other middleware
 app.add_middleware(CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Explicit OPTIONS handler for preflight requests
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(request: Request, rest_of_path: str):
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 # ── Config ─────────────────────────────────────────────────────────────────
 
