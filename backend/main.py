@@ -56,10 +56,18 @@ app.add_middleware(CORSMiddleware,
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Explicit OPTIONS handler for preflight requests
+# Serve frontend static files
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi import Request
-from fastapi.responses import JSONResponse
+import pathlib
 
+# Mount frontend if it exists (when running from repo root)
+_frontend_path = pathlib.Path(__file__).parent.parent / "frontend"
+if _frontend_path.exists():
+    app.mount("/static", StaticFiles(directory=str(_frontend_path)), name="static")
+
+# Explicit OPTIONS handler for preflight requests
 @app.options("/{rest_of_path:path}")
 async def preflight_handler(request: Request, rest_of_path: str):
     return JSONResponse(
@@ -570,8 +578,19 @@ def get_history(user = Depends(require_auth)):
 
 @app.get("/")
 def root():
-    return {"service":"Vantage of AI","version":"7.0.0",
+    # Serve frontend if available
+    frontend_index = pathlib.Path(__file__).parent.parent / "frontend" / "index.html"
+    if frontend_index.exists():
+        return FileResponse(str(frontend_index))
+    return {"service":"Vantage of AI","version":"9.0.0",
             "models":available_models(),"professions":list(PROFESSIONS.keys())}
+
+@app.get("/app")
+def serve_app():
+    frontend_index = pathlib.Path(__file__).parent.parent / "frontend" / "index.html"
+    if frontend_index.exists():
+        return FileResponse(str(frontend_index))
+    return {"error": "Frontend not found"}
 
 @app.get("/health")
 def health():

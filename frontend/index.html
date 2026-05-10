@@ -1075,7 +1075,9 @@ select option{background:var(--white)}
 </div>
 
 <script>
-const API = "https://vantage-api-7mc2.onrender.com";
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://localhost:8000"
+  : "https://vantage-api-7mc2.onrender.com";
 let useMock = true;
 let sessionId = null;
 let selIdx = null;
