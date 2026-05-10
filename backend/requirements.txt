@@ -4,7 +4,7 @@ google-genai
 openai
 anthropic
 python-dotenv
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]
 httpx
 Pillow

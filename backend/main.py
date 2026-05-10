@@ -164,18 +164,15 @@ def get_db():
 
 def hash_password(password: str) -> str:
     try:
-        from passlib.context import CryptContext
-        ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        return ctx.hash(password)
+        import bcrypt
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     except ImportError:
-        # Fallback if passlib not installed
         return hashlib.sha256(password.encode()).hexdigest()
 
 def verify_password(plain: str, hashed: str) -> bool:
     try:
-        from passlib.context import CryptContext
-        ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        return ctx.verify(plain, hashed)
+        import bcrypt
+        return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
     except ImportError:
         return hashlib.sha256(plain.encode()).hexdigest() == hashed
 
